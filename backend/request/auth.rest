@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:5000/api
+
+### 1. Registrasi Akun Customer Baru
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Edo Customer",
+  "email": "edo_customercom",
+  "password": "password123",
+  "role": "customer",
+  "phoneNumber": "08123456789"
+}
+
+###
+
+### 2. Registrasi Akun Owner Baru
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Hendra Owner Lapangan",
+  "email": "hendra_owner@mail.com",
+  "password": "password123",
+  "role": "owner",
+  "phoneNumber": "08987654321"
+}
+
+###
+
+### 3. Jalankan Login User
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "edo_customer@mail.com",
+  "password": "password123"
+}

@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const morgan = require('morgan')
 const dns = require('node:dns/promises')
 
 // Hanya gunakan DNS Google/Cloudflare jika berjalan di komputer lokal (development)
@@ -10,20 +11,32 @@ if (process.env.NODE_ENV !== 'production') {
 	}
 }
 
+// import middlerware
+const errorHandler = require('./middleware/errorMiddleware')
+
 require('dotenv').config()
 const connectDB = require('./config/db.js')
 
 const app = express()
 const PORT = process.env.PORT || 5000
 
-// 1. Jalankan Koneksi Database
+// Jalankan Koneksi Database
 connectDB()
 
-// 2. Middleware Global
+// Middleware Global
 app.use(cors()) // Mengizinkan frontend (Vite) untuk mengakses API ini
 app.use(express.json()) // Mengizinkan Express membaca data berformat JSON dari body request
 
-// 3. Rute Cek Status Server (Sanity Check)
+// logging dengan morgan
+app.use(morgan('dev'))
+
+// Daftarkan Route API
+app.use('/api/auth', require('./routes/authRoutes'))
+
+// error handler
+app.use(errorHandler)
+
+// Rute Cek Status Server (Sanity Check)
 app.get('/', (req, res) => {
 	res
 		.status(200)

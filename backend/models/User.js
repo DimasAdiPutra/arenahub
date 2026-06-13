@@ -13,24 +13,33 @@ const UserSchema = new mongoose.Schema(
 			unique: true,
 			lowercase: true,
 			trim: true,
+			// TAMBAHKAN VALIDASI REGEX EMAIL DI SINI
+			match: [
+				/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+				'Format email tidak valid, pastikan menggunakan @ dan domain yang benar (misal: nama@mail.com)',
+			],
 		},
 		password: {
 			type: String,
 			required: [true, 'Password wajib diisi'],
-			minlength: [6, 'Password minimal 6 karakter'],
+			minlength: [6, 'Password minimal harus 6 karakter atau lebih'],
 		},
 		role: {
 			type: String,
-			enum: ['customer', 'owner'],
+			enum: {
+				values: ['customer', 'owner'],
+				message: 'Role harus berupa customer atau owner',
+			},
 			default: 'customer',
 		},
 		phoneNumber: {
 			type: String,
 			trim: true,
+			required: [true, 'Nomor telepon wajib diisi'],
 		},
 	},
 	{
-		timestamps: true, // Otomatis membuat kolom createdAt dan updatedAt
+		timestamps: true,
 	},
 )
 
