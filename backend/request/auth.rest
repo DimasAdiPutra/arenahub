@@ -36,3 +36,27 @@ Content-Type: application/json
   "email": "edo_customer@mail.com",
   "password": "password123"
 }
+
+###
+
+### 4. Tes Akses Profil Tanpa Token (Harus Gagal 401)
+GET {{baseUrl}}/auth/me
+
+###
+
+### 5. Tes Akses Profil dengan Token yang Benar (Harus Sukses)
+# Langkah: Jalankan login dulu di request no 3, lalu jalankan request ini
+# @name loginUser
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "edo_customer@mail.com",
+  "password": "password123"
+}
+
+### Ambil token hasil login di atas secara otomatis
+@tokenAktif = {{loginUser.response.body.data.token}}
+
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{tokenAktif}}
