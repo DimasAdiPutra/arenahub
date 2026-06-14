@@ -1,0 +1,32 @@
+@baseUrl = http://localhost:5000/api
+
+### 1. Login untuk mendapatkan token terbaru
+# @name loginUser
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "hendra_owner@mail.com",
+  "password": "password123"
+}
+
+### Ambil token otomatis
+@token = {{loginUser.response.body.data.token}}
+
+###
+
+### 2. Get Profile User Yang Sedang Login
+GET {{baseUrl}}/users/profile
+Authorization: Bearer {{token}}
+
+###
+
+### 3. Update Profile User (Ubah Nama / No HP)
+PUT {{baseUrl}}/users/profile
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Hendra Wijaya Perkasa",
+  "phoneNumber": "089999888777"
+}
