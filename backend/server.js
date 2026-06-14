@@ -32,6 +32,8 @@ app.use(morgan('dev'))
 
 // Daftarkan Route API
 app.use('/api/auth', require('./routes/authRoutes'))
+app.use('/api/categories', require('./routes/categoryRoutes'))
+app.use('/api/spaces', require('./routes/spaceRoutes'))
 
 // error handler
 app.use(errorHandler)

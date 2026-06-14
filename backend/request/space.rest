@@ -1,0 +1,111 @@
+@baseUrl = http://localhost:5000/api
+
+### 1. Login Sebagai Owner/Admin untuk Mendapatkan Token
+# @name loginOwner
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "hendra_owner@mail.com",
+  "password": "password123"
+}
+
+### Tampung token hasil login di atas ke variabel otomatis
+@tokenOwner = {{loginOwner.response.body.data.token}}
+
+
+### ─────────────────────────────────────────────────────────────
+### DATA MASTER KATEGORI
+### ─────────────────────────────────────────────────────────────
+
+### 2. Buat Kategori Awal Secara Manual (Karena DB Masih Kosong)
+# @name createCategoryManual
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{tokenOwner}}
+
+{
+  "name": "Futsal"
+}
+
+### Tampung ID Kategori yang baru dibuat secara otomatis ke variabel!
+@idKategoriFutsal = {{createCategoryManual.response.body.data._id}}
+
+
+### 3. Ambil Semua Kategori yang Ada di Database
+# Sekarang rute ini akan menampilkan kategori "Futsal" yang baru dibuat
+GET {{baseUrl}}/categories
+
+
+### ─────────────────────────────────────────────────────────────
+### SKENARIO A: Tambah Lapangan dengan Kategori yang SUDAH ADA
+### ─────────────────────────────────────────────────────────────
+
+### 4. Tambah Lapangan Baru (Menggunakan ID Kategori Otomatis dari Request No. 2)
+POST {{baseUrl}}/spaces
+Content-Type: application/json
+Authorization: Bearer {{tokenOwner}}
+
+{
+  "title": "Arena Futsal FIFA King",
+  "description": "Lapangan futsal menggunakan rumput sintetis premium impor, standar internasional.",
+  "category": "{{idKategoriFutsal}}",
+  "pricePerHour": 150000,
+  "location": "Jl. Soekarno-Hatta No. 45, Bandung",
+  "facilities": ["Ruang Ganti", "Shower Air Hangat", "Kantin", "Rompi Pinjaman"],
+  "images": ["https://images.unsplash.com/photo-1575361204480-aadea25e6e68"]
+}
+
+
+### ─────────────────────────────────────────────────────────────
+### SKENARIO B: Fitur Keren UX (Owner Mengetik Kategori Baru)
+### ─────────────────────────────────────────────────────────────
+
+### 5. Tambah Lapangan Baru + Otomatis Membuat Kategori Baru di Backend
+# Kita kirim teks "Badminton", backend akan otomatis melahirkannya di database
+POST {{baseUrl}}/spaces
+Content-Type: application/json
+Authorization: Bearer {{tokenOwner}}
+
+{
+  "title": "Gor Badminton Smash Sentosa",
+  "description": "Lapangan badminton dengan karpet Li-Ning dan pencahayaan anti-silau.",
+  "category": "Badminton",
+  "pricePerHour": 60000,
+  "location": "Jl. Kaliurang KM 5, Yogyakarta",
+  "facilities": ["Kantin", "Toilet", "Parkir Luas"],
+  "images": []
+}
+
+
+### ─────────────────────────────────────────────────────────────
+### VIEW DATA LAPANGAN
+### ─────────────────────────────────────────────────────────────
+
+### 6. Ambil Semua Lapangan (Public - Terintegrasi dengan Populate)
+# Jalankan ini untuk melihat hasil akhir penggabungan Skenario A dan Skenario B
+GET {{baseUrl}}/spaces
+
+###
+
+### 7. Ambil Detail Satu Lapangan Berdasarkan ID
+# Ganti ID di bawah dengan _id lapangan yang sukses terbuat dari test sebelumnya
+GET {{baseUrl}}/spaces/6a2ea1c4a70a4ca1e7eef3ba
+
+###
+
+### 8. Update Data Lapangan (Khusus Owner Pemilik)
+PUT {{baseUrl}}/spaces/6a2ea1c4a70a4ca1e7eef3ba
+Content-Type: application/json
+Authorization: Bearer {{tokenOwner}}
+
+{
+  "pricePerHour": 175000,
+  "facilities": ["Ruang Ganti", "Shower Air Hangat", "Kantin", "Rompi Pinjaman", "Sewa Sepatu"]
+}
+
+###
+
+### 9. Hapus Lapangan (Khusus Owner Pemilik)
+DELETE {{baseUrl}}/spaces/6a2ea1cfa70a4ca1e7eef3bc
+Authorization: Bearer {{tokenOwner}}

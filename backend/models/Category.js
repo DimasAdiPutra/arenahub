@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const slugify = require('slugify')
 
 const CategorySchema = new mongoose.Schema(
 	{
@@ -16,5 +17,16 @@ const CategorySchema = new mongoose.Schema(
 	},
 	{ timestamps: true },
 )
+
+CategorySchema.pre('save', async function() {
+  // Jika field 'name' tidak mengalami perubahan, langsung keluar dari fungsi
+  if (!this.isModified('name')) return;
+  
+  // Ubah "Studio Podcast" menjadi "studio-podcast" secara otomatis
+  this.slug = slugify(this.name, { 
+    lower: true,   // Mengubah semua huruf menjadi kecil (lowercase)
+    strict: true   // Menghapus karakter khusus selain huruf, angka, dan strip (-)
+  });
+});
 
 module.exports = mongoose.model('Category', CategorySchema)

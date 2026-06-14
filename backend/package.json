@@ -26,6 +26,7 @@
     "jsonwebtoken": "^9.0.3",
     "midtrans-client": "^1.4.3",
     "mongoose": "^9.7.0",
-    "morgan": "^1.11.0"
+    "morgan": "^1.11.0",
+    "slugify": "^1.6.9"
   }
 }
