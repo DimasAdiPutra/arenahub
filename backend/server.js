@@ -35,6 +35,7 @@ app.use('/api/auth', require('./routes/authRoutes'))
 app.use('/api/users', require('./routes/userRoutes'))
 app.use('/api/categories', require('./routes/categoryRoutes'))
 app.use('/api/spaces', require('./routes/spaceRoutes'))
+app.use('/api/bookings', require('./routes/bookingRoutes'))
 
 // error handler
 app.use(errorHandler)

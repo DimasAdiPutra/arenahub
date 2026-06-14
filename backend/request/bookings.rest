@@ -1,0 +1,65 @@
+@baseUrl = http://localhost:5000/api
+
+### 1. LOGIN SEBAGAI CUSTOMER (Penyewa)
+# @name loginCustomer
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "edo_customer@mail.com",
+  "password": "password123"
+}
+
+### Tampung token customer ke variabel otomatis
+@tokenCustomer = {{loginCustomer.response.body.data.token}}
+
+
+### 2. AMBIL DAFTAR LAPANGAN UNTUK MENDAPATKAN ID LAPANGAN
+# @name getSpaces
+GET {{baseUrl}}/spaces
+
+### Tampung ID Lapangan pertama yang muncul di database secara otomatis!
+@idLapangan = {{getSpaces.response.body.data[0]._id}}
+
+
+### ─────────────────────────────────────────────────────────────
+### SKENARIO A: BOOKING SUKSES (MENGAMBIL 3 JAM SEKALIGUS)
+### ─────────────────────────────────────────────────────────────
+
+### 3. Buat Booking untuk Jam 14:00 - 17:00 (Slot 14, 15, dan 16)
+# Backend akan otomatis menghitung: 3 jam x pricePerHour lapangan
+POST {{baseUrl}}/bookings
+Content-Type: application/json
+Authorization: Bearer {{tokenCustomer}}
+
+{
+  "space": "{{idLapangan}}",
+  "date": "2026-06-20",
+  "bookedHours": [14, 15, 16]
+}
+
+
+### ─────────────────────────────────────────────────────────────
+### SKENARIO B: PENCEGAHAN TABRAKAN JADWAL (DOUBLE BOOKING)
+### ─────────────────────────────────────────────────────────────
+
+### 4. Kirim Order Baru di Jam 16:00 - 18:00 (Slot 16 dan 17)
+# SEHARUSNYA GAGAL karena slot jam 16 sudah diambil di Request No. 3!
+POST {{baseUrl}}/bookings
+Content-Type: application/json
+Authorization: Bearer {{tokenCustomer}}
+
+{
+  "space": "{{idLapangan}}",
+  "date": "2026-06-20",
+  "bookedHours": [16, 17]
+}
+
+
+### ─────────────────────────────────────────────────────────────
+### LIHAT RIWAYAT BOOKING
+### ─────────────────────────────────────────────────────────────
+
+### 5. Ambil Semua Daftar Riwayat Booking Milik Saya
+GET {{baseUrl}}/bookings/my-bookings
+Authorization: Bearer {{tokenCustomer}}

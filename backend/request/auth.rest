@@ -6,7 +6,7 @@ Content-Type: application/json
 
 {
   "name": "Edo Customer",
-  "email": "edo_customercom",
+  "email": "edo_customer@mail.com",
   "password": "password123",
   "role": "customer",
   "phoneNumber": "08123456789"
