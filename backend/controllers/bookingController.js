@@ -1,14 +1,21 @@
 const Booking = require('../models/Booking')
 const Space = require('../models/Space')
+const midtransClient = require('midtrans-client')
 const { sendSuccess } = require('../utils/responseHandler')
 
-// @desc    Buat Booking Baru (Customer)
+// 1. Inisialisasi Midtrans Snap Client
+const snap = new midtransClient.Snap({
+	isProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true' ? true : false,
+	serverKey: process.env.MIDTRANS_SERVER_KEY,
+	clientKey: process.env.MIDTRANS_CLIENT_KEY,
+})
+
+// @desc    Buat Booking Baru & Generate Midtrans Snap Token
 // @route   POST /api/bookings
 exports.createBooking = async (req, res, next) => {
 	try {
 		const { space: spaceId, date, bookedHours } = req.body
 
-		// 1. Validasi input array jam
 		if (
 			!bookedHours ||
 			!Array.isArray(bookedHours) ||
@@ -18,20 +25,18 @@ exports.createBooking = async (req, res, next) => {
 			throw new Error('Pilihlah minimal 1 jam slot lapangan')
 		}
 
-		// 2. Ambil data lapangan untuk mendapatkan harga per jam (pricePerHour)
 		const space = await Space.findById(spaceId)
 		if (!space) {
 			res.status(404)
 			throw new Error('Lapangan tidak ditemukan')
 		}
 
-		// 3. LOGIKA PENCEGAHAN TABRAKAN JADWAL (Sangat Mudah Berkat Array!)
-		// Cari apakah ada booking yang sukses/pending di tanggal yang sama, dan jamnya bertabrakan
+		// 2. Cek apakah slot jam sudah terisi (Hanya mengunci status pending & success)
 		const isSlotTaken = await Booking.findOne({
 			space: spaceId,
 			date: new Date(date),
-			paymentStatus: { $in: ['pending', 'success'] }, // Slot terkunci jika status pending atau sudah bayar
-			bookedHours: { $in: bookedHours }, // Pengecekan apakah ada jam yang sama di dalam array
+			paymentStatus: { $in: ['pending', 'success'] },
+			bookedHours: { $in: bookedHours },
 		})
 
 		if (isSlotTaken) {
@@ -41,17 +46,46 @@ exports.createBooking = async (req, res, next) => {
 			)
 		}
 
-		// 4. Hitung Total Harga Otomatis
-		// Total = (Jumlah jam yang dipilih) x (Harga per jam lapangan)
+		// 3. Hitung Total Harga
 		const totalPrice = bookedHours.length * space.pricePerHour
-
-		// 5. Generate Order ID Unik untuk Midtrans Sementara (Mocking)
-		// Format: ARNHB-TIMESTAMP-RANDOM_NUMBER
 		const midtransOrderId = `ARNHB-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`
 
-		// 6. Simpan data booking ke Database
+		const now = new Date()
+		const pad = (num) => String(num).padStart(2, '0')
+		const formattedStartTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} +0700`
+		// 4. Siapkan Parameter Parameter untuk Dikirim ke Midtrans
+		const parameter = {
+			transaction_details: {
+				order_id: midtransOrderId,
+				gross_amount: totalPrice,
+			},
+			item_details: [
+				{
+					id: spaceId,
+					price: space.pricePerHour,
+					quantity: bookedHours.length,
+					name: `${space.title} (${bookedHours.length} Jam)`,
+				},
+			],
+			customer_details: {
+				first_name: req.user.name,
+				email: req.user.email,
+				phone: req.user.phoneNumber || '',
+			},
+			// 🔥 KUNCI STRATEGI 1: Batasi waktu pembayaran hanya 15 Menit!
+			expiry: {
+				start_time: formattedStartTime, // Waktu sekarang (WIB)
+				duration: 15,
+				unit: 'minute',
+			},
+		}
+
+		// 5. Tembak ke Midtrans untuk mendapatkan Snap Token / Redirect URL
+		const transaction = await snap.createTransaction(parameter)
+
+		// 6. Simpan data booking ke database (Status default awal adalah 'pending')
 		const booking = await Booking.create({
-			customer: req.user.id, // ID didapat dari authMiddleware 'protect' (Customer harus login)
+			customer: req.user.id,
 			space: spaceId,
 			date: new Date(date),
 			bookedHours,
@@ -59,10 +93,15 @@ exports.createBooking = async (req, res, next) => {
 			midtransOrderId,
 		})
 
+		// 7. Kembalikan data booking beserta snapToken & snapUrl ke frontend
 		return sendSuccess(
 			res,
-			'Booking berhasil dibuat, silakan lanjutkan pembayaran',
-			booking,
+			'Booking berhasil dibuat, silakan selesaikan pembayaran dalam 15 menit',
+			{
+				booking,
+				token: transaction.token, // Digunakan Frontend jika pakai Snap Pop-up SDK
+				redirect_url: transaction.redirect_url, // Digunakan Frontend jika mau langsung redirect ke web Midtrans
+			},
 			201,
 		)
 	} catch (error) {
@@ -70,15 +109,62 @@ exports.createBooking = async (req, res, next) => {
 	}
 }
 
-// @desc    Ambil Semua Riwayat Booking Milik Customer Yang Login
+// @desc    Ambil Semua Riwayat Booking Milik Customer
 // @route   GET /api/bookings/my-bookings
 exports.getMyBookings = async (req, res, next) => {
 	try {
 		const bookings = await Booking.find({ customer: req.user.id })
 			.populate('space', 'title location images')
-			.sort({ createdAt: -1 }) // Urutkan dari yang paling baru
+			.sort({ createdAt: -1 })
 
 		return sendSuccess(res, 'Riwayat booking berhasil diambil', bookings)
+	} catch (error) {
+		next(error)
+	}
+}
+
+// @desc    Menerima notifikasi otomatis (Webhook) dari Midtrans terkait status pembayaran
+// @route   POST /api/bookings/webhook
+exports.handleMidtransNotification = async (req, res, next) => {
+	try {
+		const statusResponse = req.body
+
+		const orderId = statusResponse.order_id
+		const transactionStatus = statusResponse.transaction_status
+		const fraudStatus = statusResponse.fraud_status
+
+		console.log(
+			`[Midtrans Webhook] Order ID: ${orderId} | Status: ${transactionStatus}`,
+		)
+
+		// Cari data booking berdasarkan orderId Midtrans
+		const booking = await Booking.findOne({ midtransOrderId: orderId })
+		if (!booking) {
+			res.status(404)
+			throw new Error('Data booking tidak ditemukan di database ArenaHub')
+		}
+
+		// Logika Pemetaan Status Midtrans ke Database Kita
+		if (transactionStatus === 'capture' || transactionStatus === 'settlement') {
+			if (fraudStatus === 'challenge') {
+				booking.paymentStatus = 'pending'
+			} else if (fraudStatus === 'accept') {
+				booking.paymentStatus = 'success' // Pembayaran Sah & Berhasil! Lapangan terkunci permanen.
+			}
+		} else if (transactionStatus === 'cancel' || transactionStatus === 'deny') {
+			booking.paymentStatus = 'failed' // Pembayaran gagal/ditolak. Slot terbuka kembali.
+		} else if (transactionStatus === 'expire') {
+			booking.paymentStatus = 'expired' // 15 menit lewat dan tidak dibayar! Slot otomatis terbuka kembali.
+		}
+
+		// Simpan perubahan status ke database
+		await booking.save()
+
+		// Berikan respons 200 OK ke Midtrans agar mereka berhenti mengirimkan notifikasi ulang
+		return res.status(200).json({
+			status: 'OK',
+			message: 'Notifikasi Midtrans berhasil diproses',
+		})
 	} catch (error) {
 		next(error)
 	}

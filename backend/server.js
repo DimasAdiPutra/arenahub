@@ -14,6 +14,9 @@ if (process.env.NODE_ENV !== 'production') {
 // import middlerware
 const errorHandler = require('./middleware/errorMiddleware')
 
+// import utilities
+const initCleanupJob = require('./utils/cleanupJob')
+
 require('dotenv').config()
 const connectDB = require('./config/db.js')
 
@@ -46,6 +49,9 @@ app.get('/', (req, res) => {
 		.status(200)
 		.json({ message: 'Welcome to ArenaHub API Server is running smoothly!' })
 })
+
+// Jalankan fungsi cron job agar aktif di background
+initCleanupJob()
 
 // 4. Nyalakan Server HTTP
 app.listen(PORT, () => {
