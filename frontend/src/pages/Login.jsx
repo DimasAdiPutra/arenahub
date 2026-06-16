@@ -21,6 +21,8 @@ export default function Login() {
   const [error, setError] = useState('');
   const [showToast, setShowToast] = useState(false);
 
+  const [showForgotToast, setShowForgotToast] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -60,11 +62,30 @@ export default function Login() {
     }
   };
 
+  // 🟢 Fungsi Handler Lupa Password yang Elegan
+  const handleForgotPasswordClick = (e) => {
+    e.preventDefault();
+    setShowForgotToast(true);
+
+    // Otomatis sembunyikan toast dalam 3 detik
+    setTimeout(() => {
+      setShowForgotToast(false);
+    }, 3000);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans antialiased relative">
 
       {/* 🟢 BANNER TOAST SUKSES (Meluncur dari atas layar) */}
       <Toast show={showToast} title="Berhasil Masuk!" message="Mempersiapkan dashboard Anda..." />
+
+      {/* 🟢 Toast Baru untuk Lupa Password (Tipe Warning - Warna Kuning/Amber) */}
+      <Toast
+        show={showForgotToast}
+        type="warning"
+        title="Fitur Belum Tersedia"
+        message="Sistem pemulihan kata sandi otomatis sedang disiapkan untuk pembaruan versi berikutnya! 😊"
+      />
 
       <div className="sm:mx-auto w-full max-w-md">
         {/* Logo Identitas */}
@@ -112,7 +133,7 @@ export default function Login() {
             </Button>
 
             {/* Placeholder Lupa Password untuk Estetika Desain Profesional */}
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Fitur reset password sedang dikembangkan.'); }} className="text-xs font-semibold text-emerald-700 self-end hover:text-emerald-800">
+            <a href="#" onClick={handleForgotPasswordClick} className="text-xs font-semibold text-emerald-700 self-end hover:text-emerald-800">
               Lupa password?
             </a>
           </form>

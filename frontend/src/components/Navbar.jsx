@@ -3,12 +3,15 @@ import { Link } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 
 import { Bolt, ChevronDown, LogOut, Menu, X } from 'lucide-react'
+import Toast from './ui/Toast';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false); // Untuk dropdown mobile
   const [desktopDropdownOpen, setDesktopDropdownOpen] = useState(false); // Untuk dropdown desktop
   const navRef = useRef(null);
+
+  const [showSettingToast, setShowSettingToast] = useState(false);
 
   // 🖱️ Menutup semua dropdown jika user mengetuk di luar area navbar
   useEffect(() => {
@@ -22,14 +25,27 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSettingsAlert = () => {
-    setMenuOpen(false);
-    setDesktopDropdownOpen(false);
-    alert("Fitur Pengaturan Akun (Nama, Email, No. Telp, Ganti Password) sedang disiapkan untuk rilis versi berikutnya! 😊");
+  // Fungsi handler untuk toast 
+  const handleSettingAlertClick = (e) => {
+    e.preventDefault();
+    setShowSettingToast(true);
+
+    // Otomatis sembunyikan toast dalam 3 detik
+    setTimeout(() => {
+      setShowSettingToast(false);
+    }, 3000);
   };
 
   return (
     <nav className="bg-white border-b border-slate-100 sticky top-0 z-50 w-full" ref={navRef}>
+      {/* 🟢 Toast Baru untuk Lupa Password (Tipe Warning - Warna Kuning/Amber) */}
+      <Toast
+        show={showSettingToast}
+        type="warning"
+        title="Fitur Belum Tersedia"
+        message="Fitur Pengaturan Akun (Nama, Email, No. Telp, Ganti Password) sedang disiapkan untuk rilis versi berikutnya! 😊"
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
 
         {/* 🟩 KIRI: Logo */}
@@ -77,7 +93,7 @@ export default function Navbar() {
                       Dashboard Owner
                     </Link>
                   )}
-                  <button onClick={handleSettingsAlert} className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium transition">
+                  <button onClick={handleSettingAlertClick} className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium transition">
                     Account Settings
                   </button>
                   <div className="border-t border-slate-100 my-1"></div>
@@ -160,7 +176,7 @@ export default function Navbar() {
           {user ? (
             <div className="flex flex-col space-y-2.5">
               <button
-                onClick={handleSettingsAlert}
+                onClick={handleSettingAlertClick}
                 className="w-full text-left text-sm font-medium text-slate-500 hover:text-emerald-700 py-1 transition flex items-center gap-2"
               >
                 <Bolt className="w-4 h-4 text-slate-400" strokeWidth={2.5} />
