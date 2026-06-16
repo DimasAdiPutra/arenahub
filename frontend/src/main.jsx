@@ -3,8 +3,12 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
+import { AuthProvider } from './context/AuthContext.jsx' // ◄ Import Provider-nya
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <AuthProvider> {/* ◄ Bungkus App di sini */}
+      <App />
+    </AuthProvider>
   </StrictMode>,
 )
