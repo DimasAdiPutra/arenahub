@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router'; // ◄ Memakai react-router sesuai instruksi
 import axios from 'axios';
 
+import useDocumentTitle from '../hooks/useDocumentTitle';
+
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -37,6 +39,8 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  useDocumentTitle('Register')
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center p-4">

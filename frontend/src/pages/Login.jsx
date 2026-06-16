@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
+import useDocumentTitle from '../hooks/useDocumentTitle';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,10 +30,6 @@ export default function Login() {
       // Contoh struktur respon biasanya: { user: {name, email}, token: "ey..." }
       const { user, token } = response.data.data;
 
-      console.log(response.data)
-      console.log(user)
-      console.log(token)
-
       // Simpan ke AuthContext global
       login(user, token);
 
@@ -43,6 +41,8 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  useDocumentTitle('Login')
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center p-4">

@@ -33,8 +33,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData)); // Simpan objek user ke browser
     setToken(userToken);
     setUser(userData);
-    console.log(user)
-    console.log(token)
   };
 
   // 🔒 Fungsi Logout Clean
