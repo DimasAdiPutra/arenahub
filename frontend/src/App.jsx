@@ -5,26 +5,36 @@ import DetailPage from './pages/DetailPage';
 import HistoryPage from './pages/HistoryPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import OwnerDashboard from './pages/OwnerDashboard'; // ◄ Ubah nama komponen jadi OwnerDashboard
+import OwnerDashboard from './pages/OwnerDashboard';
+import ProtectedRoute from './components/ProtectedRoute'; // ◄ Import pelindung rute
 
 export default function App() {
   return (
     <Router>
       <Routes>
-        {/* 🟩 JALUR CUSTOMER (Ada Navbar Atas) */}
+
+        {/* 🟩 JALUR UMUM & CUSTOMER (Bisa diakses siapa saja / tanpa login) */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/venue/:id" element={<DetailPage />} />
-          <Route path="/history" element={<HistoryPage />} />
+
+          {/* 🔏 Jalur Khusus Customer Terautentikasi */}
+          {/* Hanya user dengan role 'customer' yang bisa melihat history booking */}
+          <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
+            <Route path="/history" element={<HistoryPage />} />
+          </Route>
         </Route>
 
-        {/* 🔏 JALUR AUTENTIKASI (Polos) */}
+        {/* 🔏 JALUR AUTENTIKASI (Polos tanpa Navbar/Footer) */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* 👑 JALUR OWNER (Dashboard Pengelolaan Jadwal Lapangan & Keuangan milik Owner) */}
-        {/* 💡 Mengubah rute menjadi /owner/dashboard sesuai database backend */}
-        <Route path="/owner/dashboard" element={<OwnerDashboard />} />
+        {/* 👑 JALUR PEMILIK LAPANGAN (Owner Only) */}
+        {/* Mengunci rute dashboard agar tidak bisa diintip oleh customer biasa */}
+        <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
+          <Route path="/owner/dashboard" element={<OwnerDashboard />} />
+        </Route>
+
       </Routes>
     </Router>
   );

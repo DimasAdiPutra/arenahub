@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
-import axios from 'axios';
+import API from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import Input from '../components/ui/Input';
+import Toast from '../components/ui/Toast';
+import Button from '../components/ui/Button';
 
 export default function Login() {
   useDocumentTitle('ArenaHub | Masuk ke Akun');
@@ -25,10 +28,7 @@ export default function Login() {
 
     try {
       // 🚀 Tembak API Login Backend
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
-        email,
-        password
-      });
+      const response = await API.post('/auth/login', { email, password });
 
       // Ambil data user & token sesuai standar responseHandler backend Anda
       const { user, token } = response.data.data;
@@ -64,20 +64,7 @@ export default function Login() {
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans antialiased relative">
 
       {/* 🟢 BANNER TOAST SUKSES (Meluncur dari atas layar) */}
-      <div
-        className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4 transition-all duration-300 ease-out
-          ${showToast ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
-      >
-        <div className="bg-emerald-800 text-white px-4 py-3.5 rounded-xl shadow-xl flex items-center gap-3 border border-emerald-600/20">
-          <svg className="w-5 h-5 text-emerald-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div className="flex-1">
-            <p className="text-sm font-bold">Berhasil Masuk!</p>
-            <p className="text-xs text-emerald-200 mt-0.5">Mempersiapkan dashboard Anda...</p>
-          </div>
-        </div>
-      </div>
+      <Toast show={showToast} title="Berhasil Masuk!" message="Mempersiapkan dashboard Anda..." />
 
       <div className="sm:mx-auto w-full max-w-md">
         {/* Logo Identitas */}
@@ -105,54 +92,29 @@ export default function Login() {
             </div>
           )}
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-5 flex flex-col" onSubmit={handleSubmit}>
 
             {/* Input Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-1">
-                Alamat Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 text-sm transition"
-                placeholder="name@example.com"
-              />
-            </div>
+            <Input
+              label="Alamat Email" id="email" type="email" required
+              value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com"
+            />
 
             {/* Input Password */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label htmlFor="password" className="block text-sm font-semibold text-slate-700">
-                  Password
-                </label>
-                {/* Placeholder Lupa Password untuk Estetika Desain Profesional */}
-                <a href="#" onClick={(e) => { e.preventDefault(); alert('Fitur reset password sedang dikembangkan.'); }} className="text-xs font-semibold text-emerald-700 hover:text-emerald-800">
-                  Lupa password?
-                </a>
-              </div>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 text-sm transition"
-                placeholder="••••••••"
-              />
-            </div>
+            <Input
+              label="Password" id="password" type="password" required
+              value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
+            />
 
             {/* Tombol Submit Masuk */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-            >
-              {loading ? 'Memverifikasi...' : 'Masuk ke Aplikasi'}
-            </button>
+            <Button type="submit" loading={loading}>
+              Masuk
+            </Button>
+
+            {/* Placeholder Lupa Password untuk Estetika Desain Profesional */}
+            <a href="#" onClick={(e) => { e.preventDefault(); alert('Fitur reset password sedang dikembangkan.'); }} className="text-xs font-semibold text-emerald-700 self-end hover:text-emerald-800">
+              Lupa password?
+            </a>
           </form>
 
         </div>

@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 export default function MainLayout() {
   return (
@@ -8,6 +9,7 @@ export default function MainLayout() {
       <main className="flex-1">
         <Outlet /> {/* ◄ Halaman dinamis (Landing, Detail, History) akan muncul di sini */}
       </main>
+      <Footer />
     </div>
   );
 }
