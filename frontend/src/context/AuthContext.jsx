@@ -1,48 +1,57 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 
-// 1. Membuat indra atau wadah Context khusus Autentikasi
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Ambil token dari localStorage sejak awal render jika ada
   const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [user, setUser] = useState(() => {
+    // Ambil data user yang tersimpan di localStorage agar tidak hilang saat refresh
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [loading, setLoading] = useState(true);
 
-  // 🔄 Efek untuk mengecek apakah ada token yang tersimpan saat aplikasi pertama kali dimuat
   useEffect(() => {
-    if (token) {
-      // Sementara kita simpan dummy data user dari token yang ada.
-      // Nanti di sini kita bisa tembak API backend (GET /api/auth/me) untuk ambil data profil asli.
-      setUser({ name: "User ArenaHub", email: "user@arenahub.com" });
+    // Sinkronisasi status loading
+    if (token && user) {
+      setToken(token);
+      setUser(user);
     } else {
+      // Jika salah satu tidak ada, bersihkan semua agar aman
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setToken(null);
       setUser(null);
     }
     setLoading(false);
-  }, [token]);
+  }, [token, user]);
 
-  // 🔓 Fungsi Aksi Login
+  // 🔓 Fungsi Login Asli (Menerima data riil dari form Login.jsx)
   const login = (userData, userToken) => {
+    localStorage.setItem('token', userToken);
+    localStorage.setItem('user', JSON.stringify(userData)); // Simpan objek user ke browser
     setToken(userToken);
     setUser(userData);
-    localStorage.setItem('token', userToken); // Simpan di browser
+    console.log(user)
+    console.log(token)
   };
 
-  // 🔒 Fungsi Aksi Logout
+  // 🔒 Fungsi Logout Clean
   const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-    localStorage.removeItem('token'); // Hapus dari browser
   };
 
   return (
     <AuthContext.Provider value={{ user, token, loading, login, logout }}>
-      {/* Jangan rendir aplikasi sebelum pengecekan token selesai */}
       {!loading && children}
     </AuthContext.Provider>
   );
 };
 
-// 🔌 Custom Hook biar panggil Context-nya jauh lebih pendek di halaman lain
 export const useAuth = () => {
   return useContext(AuthContext);
 };
