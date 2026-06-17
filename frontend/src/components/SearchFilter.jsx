@@ -28,7 +28,7 @@ export default function SearchFilter({
           <button
             key={cat._id || cat.id} // ◄ Menggunakan ID Mongoose sebagai key unik React
             onClick={() => setSelectedCategory(cat.name)} // ◄ Set filter berdasarkan field 'name' skema Mongoose Anda
-            className={`text-xs font-bold px-4 py-2 rounded-lg transition whitespace-nowrap flex-shrink-0 border
+            className={`text-xs font-bold px-4 py-2 rounded-lg transition whitespace-nowrap shrink-0 border
               ${selectedCategory === cat.name
                 ? 'bg-emerald-700 border-emerald-700 text-white shadow-sm shadow-emerald-700/20'
                 : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
