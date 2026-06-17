@@ -30,7 +30,7 @@ export default function Toast({ show, type = 'success', title, message }) {
         ${show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
     >
       <div className={`${activeStyle.bg} text-white px-4 py-3.5 rounded-xl shadow-xl flex items-center gap-3 border`}>
-        <div className={activeStyle.iconColor} className="flex-shrink-0">
+        <div className={activeStyle.iconColor} className="shrink-0">
           {activeStyle.icon}
         </div>
         <div className="flex-1">
