@@ -1,65 +1,110 @@
 const Space = require('../models/Space')
-const Category = require('../models/Category') // 1. Import model Category
+const Category = require('../models/Category')
 const { sendSuccess } = require('../utils/responseHandler')
 const mongoose = require('mongoose')
+const { imagekit, toFile } = require('../config/imagekit')
 
+// @desc    Tambah Lapangan/Tempat Baru (Owner Only)
+// @route   POST /api/spaces
 exports.createSpace = async (req, res, next) => {
-	try {
-		let {
-			title,
-			description,
-			category,
-			pricePerHour,
-			location,
-			facilities,
-			images,
-		} = req.body
+	// 1. Definisikan array imageUrls di luar blok try agar bisa diakses oleh blok catch jika terjadi error
+	let imageUrls = []
 
-		// 2. LOGIKA OTOMATIS: Cek apakah 'category' yang dikirim berupa ObjectId valid atau teks biasa
+	try {
+		let { title, description, category, pricePerHour, location, facilities } =
+			req.body
+
+		// ─── 2. PROSES UPLOAD GAMBAR KE IMAGEKIT ───
+		if (req.files && req.files.length > 0) {
+			for (const file of req.files) {
+				const uniqueFileName = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`
+
+				const uploadResponse = await imagekit.files.upload({
+					file: await toFile(file.buffer, uniqueFileName),
+					fileName: uniqueFileName,
+					folder: '/arenahub',
+				})
+
+				// Simpan url dan fileId ke array eksternal
+				imageUrls.push({
+					url: uploadResponse.url,
+					fileId: uploadResponse.fileId,
+				})
+			}
+		}
+
+		// ─── 3. LOGIKA OTOMATISASI KATEGORI DINAMIS ───
 		const isObjectId = mongoose.Types.ObjectId.isValid(category)
 
-		if (!isObjectId) {
-			// Jika BUKAN ObjectId, berarti owner mengetik kategori baru yang belum ada di DB
-			// Cek dulu apakah kategori dengan nama tersebut sebetulnya sudah ada (antisipasi duplikat huruf besar/kecil)
+		if (!isObjectId && category) {
+			const cleanedCategoryName = category.trim()
 			let existingCategory = await Category.findOne({
-				name: { $regex: new RegExp(`^${category}$`, 'i') },
+				name: { $regex: new RegExp(`^${cleanedCategoryName}$`, 'i') },
 			})
 
 			if (!existingCategory) {
-				// Jika benar-benar belum ada, buat kategori baru otomatis
-				existingCategory = await Category.create({ name: category })
+				existingCategory = await Category.create({ name: cleanedCategoryName })
 			}
 
-			// Ganti variabel category dengan ID kategori yang baru dibuat/ditemukan
 			category = existingCategory._id
 		}
 
-		// 3. Simpan space dengan ID kategori yang sudah fix
+		// ─── 4. PARSING ANTISIPASI FORMAT MULTIPART ───
+		if (typeof facilities === 'string') {
+			try {
+				facilities = JSON.parse(facilities)
+			} catch (e) {
+				facilities = facilities.split(',').map((item) => item.trim())
+			}
+		}
+
+		// ─── 5. SIMPAN DATA KE MONGOOSE (Memicu validasi skema) ───
 		const space = await Space.create({
 			owner: req.user.id,
 			title,
 			description,
-			category, // Sudah pasti berupa ObjectId sekarang
-			pricePerHour,
+			category,
+			pricePerHour: Number(pricePerHour),
 			location,
-			facilities,
-			images,
+			facilities: facilities || [],
+			images: imageUrls,
 		})
 
 		return sendSuccess(res, 'Tempat/Lapangan berhasil didaftarkan', space, 201)
 	} catch (error) {
+		// ─── 6. BLOK ROLLBACK OTOMATIS JIKA DB GAGAL SIMPAN ───
+		if (imageUrls.length > 0) {
+			console.log(
+				'⚠️ Database gagal menyimpan data. Memulai pembersihan berkas sampah di ImageKit...',
+			)
+
+			for (const img of imageUrls) {
+				try {
+					await imagekit.files.delete(img.fileId)
+					console.log(
+						`[Rollback] Berhasil menghapus kembali file sampah ID: ${img.fileId}`,
+					)
+				} catch (ikErr) {
+					console.error(
+						`[Rollback Gagal] Gagal menghapus berkas ${img.fileId}:`,
+						ikErr.message,
+					)
+				}
+			}
+		}
+
+		// Teruskan error utama (misal: "Title is required") ke middleware global error handler
 		next(error)
 	}
 }
 
-// @desc    Ambil Semua Lapangan (Public - Menampilkan Fitur Filter & Populate)
+// @desc    Ambil Semua Lapangan (Public)
 // @route   GET /api/spaces
 exports.getAllSpaces = async (req, res, next) => {
 	try {
-		// Kita gunakan .populate() untuk mengambil data Nama Kategori & Nama Owner secara otomatis
 		const spaces = await Space.find()
 			.populate('category', 'name slug')
-			.populate('owner', 'name emailphoneNumber')
+			.populate('owner', 'name email phoneNumber')
 
 		return sendSuccess(res, 'Daftar lapangan berhasil diambil', spaces)
 	} catch (error) {
@@ -86,7 +131,7 @@ exports.getSpaceById = async (req, res, next) => {
 	}
 }
 
-// @desc    Update Data Lapangan (Hanya bisa oleh Owner pemilik lapangan tersebut)
+// @desc    Update Data Lapangan (Owner Only)
 // @route   PUT /api/spaces/:id
 exports.updateSpace = async (req, res, next) => {
 	try {
@@ -97,7 +142,6 @@ exports.updateSpace = async (req, res, next) => {
 			throw new Error('Lapangan/Tempat tidak ditemukan')
 		}
 
-		// PROTEKSI: Pastikan owner yang mau edit adalah owner yang mendaftarkan lapangan ini
 		if (space.owner.toString() !== req.user.id) {
 			res.status(403)
 			throw new Error(
@@ -105,7 +149,7 @@ exports.updateSpace = async (req, res, next) => {
 			)
 		}
 
-		// Jika di update ada perubahan kategori berupa string teks baru (Logika Pendekatan B kita)
+		// Pemrosesan Kategori Baru pada Rute Update
 		if (
 			req.body.category &&
 			!mongoose.Types.ObjectId.isValid(req.body.category)
@@ -120,7 +164,23 @@ exports.updateSpace = async (req, res, next) => {
 			req.body.category = existingCategory._id
 		}
 
-		// Lakukan update data
+		// Pemrosesan parsing fasilitas pada Rute Update
+		if (req.body.facilities && typeof req.body.facilities === 'string') {
+			try {
+				req.body.facilities = JSON.parse(req.body.facilities)
+			} catch (e) {
+				req.body.facilities = req.body.facilities
+					.split(',')
+					.map((item) => item.trim())
+			}
+		}
+
+		// ─── BONUS PROTEKSI DATA IMAGES SAAT UPDATE ───
+		// Jika update tidak mengirim berkas file gambar baru, tetap pertahankan gambar lama di DB
+		if (!req.files || req.files.length === 0) {
+			delete req.body.images
+		}
+
 		space = await Space.findByIdAndUpdate(req.params.id, req.body, {
 			new: true,
 			runValidators: true,
@@ -132,7 +192,7 @@ exports.updateSpace = async (req, res, next) => {
 	}
 }
 
-// @desc    Hapus Lapangan (Hanya bisa oleh Owner pemilik lapangan)
+// @desc    Hapus Lapangan (Owner Only)
 // @route   DELETE /api/spaces/:id
 exports.deleteSpace = async (req, res, next) => {
 	try {
@@ -151,9 +211,33 @@ exports.deleteSpace = async (req, res, next) => {
 			)
 		}
 
+		// 🟢 PROSES PEMBERSIHAN OTOMATIS DI IMAGEKIT
+		if (space.images && space.images.length > 0) {
+			for (const img of space.images) {
+				try {
+					// Tembak API ImageKit untuk menghapus file berdasarkan fileId yang tersimpan
+					await imagekit.files.delete(img.fileId)
+					console.log(
+						`Berhasil menghapus file ImageKit dengan ID: ${img.fileId}`,
+					)
+				} catch (ikErr) {
+					// Gunakan try-catch internal agar jika ada satu gambar gagal dihapus di cloud,
+					// proses penghapusan data utama di MongoDB tidak ikut macet/gagal.
+					console.error(
+						`Gagal menghapus gambar ${img.fileId} di ImageKit:`,
+						ikErr.message,
+					)
+				}
+			}
+		}
+
+		// Hapus dokumen dari MongoDB setelah semua aset di cloud bersih
 		await space.deleteOne()
 
-		return sendSuccess(res, 'Lapangan berhasil dihapus dari sistem')
+		return sendSuccess(
+			res,
+			'Lapangan dan seluruh aset gambar berhasil dihapus dari sistem',
+		)
 	} catch (error) {
 		next(error)
 	}

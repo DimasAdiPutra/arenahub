@@ -33,164 +33,227 @@ Authorization: Bearer {{tokenOwner}}
 
 
 ### 3. Ambil Semua Kategori yang Ada di Database
-# Sekarang rute ini akan menampilkan kategori "Futsal" yang baru dibuat
 GET {{baseUrl}}/categories
 
 
 ### ─────────────────────────────────────────────────────────────
-### SKENARIO A: Tambah Lapangan dengan Kategori yang SUDAH ADA
+### SKENARIO A: Tambah Lapangan dengan Kategori yang SUDAH ADA (Futsal)
 ### ─────────────────────────────────────────────────────────────
 
-### 4. Tambah Lapangan Baru (Menggunakan ID Kategori Otomatis dari Request No. 2)
+### 4. Tambah Lapangan Futsal (Menggunakan ID Kategori dari Request No. 2 & File Gambar Asli)
 POST {{baseUrl}}/spaces
-Content-Type: application/json
 Authorization: Bearer {{tokenOwner}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryFutsal
 
-{
-  "title": "Arena Futsal FIFA King",
-  "description": "Lapangan futsal menggunakan rumput sintetis premium impor, standar internasional.",
-  "category": "{{idKategoriFutsal}}",
-  "pricePerHour": 150000,
-  "location": "Jl. Soekarno-Hatta No. 45, Bandung",
-  "facilities": ["Ruang Ganti", "Shower Air Hangat", "Kantin", "Rompi Pinjaman"],
-  "images": ["https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=800&auto=format&fit=crop"]
-}
+------WebKitFormBoundaryFutsal
+Content-Disposition: form-data; name="title"
 
+Arena Futsal FIFA King
+------WebKitFormBoundaryFutsal
+Content-Disposition: form-data; name="description"
 
-### ─────────────────────────────────────────────────────────────
-### SKENARIO B: Fitur Keren UX (Owner Mengetik Kategori Baru)
-### ─────────────────────────────────────────────────────────────
+Lapangan futsal menggunakan rumput sintetis premium impor, standar internasional.
+------WebKitFormBoundaryFutsal
+Content-Disposition: form-data; name="category"
 
-### 5. Tambah Lapangan Baru + Otomatis Membuat Kategori Baru di Backend (Badminton)
-POST {{baseUrl}}/spaces
-Content-Type: application/json
-Authorization: Bearer {{tokenOwner}}
+{{idKategoriFutsal}}
+------WebKitFormBoundaryFutsal
+Content-Disposition: form-data; name="pricePerHour"
 
-{
-  "title": "Gor Badminton Smash Sentosa",
-  "description": "Lapangan badminton dengan karpet Li-Ning dan pencahayaan anti-silau.",
-  "category": "Badminton",
-  "pricePerHour": 60000,
-  "location": "Jl. Kaliurang KM 5, Yogyakarta",
-  "facilities": ["Kantin", "Toilet", "Parkir Luas"],
-  "images": ["https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?q=80&w=800&auto=format&fit=crop"]
-}
+150000
+------WebKitFormBoundaryFutsal
+Content-Disposition: form-data; name="location"
 
-### 5b. Tambah Lapangan Basket + Otomatis Membuat Kategori Baru (Basket)
-POST {{baseUrl}}/spaces
-Content-Type: application/json
-Authorization: Bearer {{tokenOwner}}
+Jl. Soekarno-Hatta No. 45, Bandung
+------WebKitFormBoundaryFutsal
+Content-Disposition: form-data; name="facilities"
 
-{
-  "title": "Elite Arena Basketball Court",
-  "description": "Lapangan basket indoor premium dengan lantai vinyl berkualitas tinggi untuk meredam benturan lutut. Papan skor digital siap pakai.",
-  "category": "Basket",
-  "pricePerHour": 150000,
-  "location": "Ruko Grand Boulevard Blok B/18, Harapan Indah, Bekasi",
-  "facilities": ["Papan Skor Digital", "Loker Barang", "Water Station", "Shower"],
-  "images": ["https://images.unsplash.com/photo-1544698310-74ea9d1c8258?q=80&w=800&auto=format&fit=crop"]
-}
+["Ruang Ganti", "Shower Air Hangat", "Kantin", "Rompi Pinjaman"]
+------WebKitFormBoundaryFutsal
+Content-Disposition: form-data; name="images"; filename="futsal.jpg"
+Content-Type: image/jpeg
 
-### 5c. Tambah Lapangan Tenis + Otomatis Membuat Kategori Baru (Tenis)
-POST {{baseUrl}}/spaces
-Content-Type: application/json
-Authorization: Bearer {{tokenOwner}}
-
-{
-  "title": "Kemang Pratama Tennis Club",
-  "description": "Lapangan tenis outdoor hard-court dengan pengecatan standar turnamen nasional (Pelti). Dilengkapi lampu sorot lapangan untuk malam hari.",
-  "category": "Tenis",
-  "pricePerHour": 80000,
-  "location": "Kompleks Kemang Pratama 3, Blok J-11, Rawalumbu, Bekasi",
-  "facilities": ["Lampu Sorot Malam", "Kursi Wasit", "Tribun Penonton", "Tempat Parkir"],
-  "images": ["https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?q=80&w=800&auto=format&fit=crop"]
-}
+< ../assets/futsal.jpg
+------WebKitFormBoundaryFutsal--
 
 
 ### ─────────────────────────────────────────────────────────────
-### SKENARIO C: Tambah Kategori Non-Olahraga (Aula, Auditorium, Meeting, Kelas)
+### SKENARIO B: Fitur Otomatisasi Pembuatan Kategori Baru (Olahraga)
 ### ─────────────────────────────────────────────────────────────
 
-### 5d. Tambah Aula Serbaguna + Otomatis Membuat Kategori Baru (Aula)
+### 5. Tambah Lapangan Badminton + Otomatis Membuat Kategori Baru (Badminton)
 POST {{baseUrl}}/spaces
-Content-Type: application/json
 Authorization: Bearer {{tokenOwner}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryBadminton
 
-{
-  "title": "Grand Siliwangi Convention Hall",
-  "description": "Aula serbaguna megah dengan langit-langit tinggi yang dilengkapi lampu kristal mewah. Sangat ideal untuk pernikahan, wisuda, atau seminar besar.",
-  "category": "Aula",
-  "pricePerHour": 1500000,
-  "location": "Jl. Raya Pekayon No. 88, Pekayon Jaya, Bekasi Selatan",
-  "facilities": ["Full AC", "Sound System 10.000 Watt", "Panggung Utama", "Ruang Rias Artis", "Parkir Luas"],
-  "images": ["https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=800&auto=format&fit=crop"]
-}
+------WebKitFormBoundaryBadminton
+Content-Disposition: form-data; name="title"
 
-### 5e. Tambah Auditorium Berundak + Otomatis Membuat Kategori Baru (Auditorium)
+Gor Badminton Smash Sentosa
+------WebKitFormBoundaryBadminton
+Content-Disposition: form-data; name="description"
+
+Lapangan badminton dengan karpet Li-Ning dan pencahayaan anti-silau standar turnamen nasional.
+------WebKitFormBoundaryBadminton
+Content-Disposition: form-data; name="category"
+
+Badminton
+------WebKitFormBoundaryBadminton
+Content-Disposition: form-data; name="pricePerHour"
+
+60000
+------WebKitFormBoundaryBadminton
+Content-Disposition: form-data; name="location"
+
+Jl. Kaliurang KM 5, Yogyakarta
+------WebKitFormBoundaryBadminton
+Content-Disposition: form-data; name="facilities"
+
+["Kantin", "Toilet", "Parkir Luas"]
+------WebKitFormBoundaryBadminton
+Content-Disposition: form-data; name="images"; filename="badminton.jpg"
+Content-Type: image/jpeg
+
+< ../assets/badminton.jpg
+------WebKitFormBoundaryBadminton--
+
+###
+
+### 6. Tambah Lapangan Basket + Otomatis Membuat Kategori Baru (Basket)
 POST {{baseUrl}}/spaces
-Content-Type: application/json
 Authorization: Bearer {{tokenOwner}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryBasket
 
-{
-  "title": "Creative Hub Amphitheater & Auditorium",
-  "description": "Auditorium modern dengan susunan kursi teater berundak. Dilengkapi dengan sistem akustik dinding kedap suara profesional.",
-  "category": "Auditorium",
-  "pricePerHour": 850000,
-  "location": "Kawasan Summarecon Bekasi, Gedung Edu Center Lantai 3, Bekasi",
-  "facilities": ["250 Kursi Ergonomis", "Lighting Stage System", "Wireless Microphone", "Podium Pembicara", "High Speed Wi-Fi"],
-  "images": ["https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=800&auto=format&fit=crop"]
-}
+------WebKitFormBoundaryBasket
+Content-Disposition: form-data; name="title"
 
-### 5f. Tambah Ruang Rapat Eksekutif + Otomatis Membuat Kategori Baru (Ruang Meeting)
-POST {{baseUrl}}/spaces
-Content-Type: application/json
-Authorization: Bearer {{tokenOwner}}
+Elite Arena Basketball Court
+------WebKitFormBoundaryBasket
+Content-Disposition: form-data; name="description"
 
-{
-  "title": "Vantage Executive Boardroom",
-  "description": "Ruang rapat privat eksklusif dengan desain minimalis kontemporer. Dilengkapi smart TV 75 inci untuk kebutuhan presentasi hibrida.",
-  "category": "Ruang Meeting",
-  "pricePerHour": 250000,
-  "location": "Sinpasa Commercial Blok A/05, Marga Mulya, Bekasi Utara",
-  "facilities": ["Smart TV 4K 75\"", "Whiteboard & Spidol", "Colokan Meja Terintegrasi", "Kopi & Teh Gratis"],
-  "images": ["https://images.unsplash.com/photo-1431540015161-0bf868a2d407?q=80&w=800&auto=format&fit=crop"]
-}
+Lapangan basket indoor premium dengan lantai vinyl berkualitas tinggi untuk meredam benturan lutut. Papan skor digital siap pakai.
+------WebKitFormBoundaryBasket
+Content-Disposition: form-data; name="category"
 
-### 5g. Tambah Ruang Workshop/Kelas + Otomatis Membuat Kategori Baru (Ruang Kelas)
-POST {{baseUrl}}/spaces
-Content-Type: application/json
-Authorization: Bearer {{tokenOwner}}
+Basket
+------WebKitFormBoundaryBasket
+Content-Disposition: form-data; name="pricePerHour"
 
-{
-  "title": "Alpha Workspace Studio 2",
-  "description": "Ruang kelas modern yang fleksibel untuk kebutuhan pelatihan, workshop UMKM, atau kelas intensif.",
-  "category": "Ruang Kelas",
-  "pricePerHour": 180000,
-  "location": "Jl. Kalimalang Raya No. 14B, Jakasampurna, Bekasi Barat",
-  "facilities": ["Proyektor & Layar", "Kapasitas 30 Orang", "Full AC", "Kabel Rol Tambahan"],
-  "images": ["https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop"]
-}
+150000
+------WebKitFormBoundaryBasket
+Content-Disposition: form-data; name="location"
+
+Ruko Grand Boulevard Blok B/18, Harapan Indah, Bekasi
+------WebKitFormBoundaryBasket
+Content-Disposition: form-data; name="facilities"
+
+["Papan Skor Digital", "Loker Barang", "Water Station", "Shower"]
+------WebKitFormBoundaryBasket
+Content-Disposition: form-data; name="images"; filename="basket.jpg"
+Content-Type: image/jpeg
+
+< ../assets/basket.jpg
+------WebKitFormBoundaryBasket--
 
 
 ### ─────────────────────────────────────────────────────────────
-### VIEW DATA LAPANGAN / SPACES
+### SKENARIO C: Tambah Kategori Non-Olahraga
 ### ─────────────────────────────────────────────────────────────
 
-### 6. Ambil Semua Lapangan (Public - Terintegrasi dengan Populate)
-# Jalankan ini untuk melihat seluruh variasi data olahraga dan non-olahraga yang berhasil terbuat!
+### 7. Tambah Aula Serbaguna + Otomatis Membuat Kategori Baru (Aula)
+POST {{baseUrl}}/spaces
+Authorization: Bearer {{tokenOwner}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryAula
+
+------WebKitFormBoundaryAula
+Content-Disposition: form-data; name="title"
+
+Grand Siliwangi Convention Hall
+------WebKitFormBoundaryAula
+Content-Disposition: form-data; name="description"
+
+Aula serbaguna megah dengan langit-langit tinggi yang dilengkapi lampu kristal mewah. Sangat ideal untuk pernikahan, wisuda, atau seminar besar.
+------WebKitFormBoundaryAula
+Content-Disposition: form-data; name="category"
+
+Aula
+------WebKitFormBoundaryAula
+Content-Disposition: form-data; name="pricePerHour"
+
+1500000
+------WebKitFormBoundaryAula
+Content-Disposition: form-data; name="location"
+
+'Jl. Raya Pekayon No. 88, Pekayon Jaya, Bekasi Selatan
+------WebKitFormBoundaryAula
+Content-Disposition: form-data; name="facilities"
+
+["Full AC", "Sound System 10.000 Watt", "Panggung Utama", "Ruang Rias Artis", "Parkir Luas"]
+------WebKitFormBoundaryAula
+Content-Disposition: form-data; name="images"; filename="aula.jpg"
+Content-Type: image/jpeg
+
+< ../assets/aula.jpg
+------WebKitFormBoundaryAula--
+
+###
+
+### 8. Tambah Auditorium Berundak + Otomatis Membuat Kategori Baru (Auditorium)
+POST {{baseUrl}}/spaces
+Authorization: Bearer {{tokenOwner}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryAuditorium
+
+------WebKitFormBoundaryAuditorium
+Content-Disposition: form-data; name="title"
+
+Creative Hub Amphitheater & Auditorium
+------WebKitFormBoundaryAuditorium
+Content-Disposition: form-data; name="description"
+
+Auditorium modern dengan susunan kursi teater berundak. Dilengkapi dengan sistem akustik dinding kedap suara profesional.
+------WebKitFormBoundaryAuditorium
+Content-Disposition: form-data; name="category"
+
+Auditorium
+------WebKitFormBoundaryAuditorium
+Content-Disposition: form-data; name="pricePerHour"
+
+850000
+------WebKitFormBoundaryAuditorium
+Content-Disposition: form-data; name="location"
+
+Kawasan Summarecon Bekasi, Gedung Edu Center Lantai 3, Bekasi
+------WebKitFormBoundaryAuditorium
+Content-Disposition: form-data; name="facilities"
+
+["250 Kursi Ergonomis", "Lighting Stage System", "Wireless Microphone", "Podium Pembicara", "High Speed Wi-Fi"]
+------WebKitFormBoundaryAuditorium
+Content-Disposition: form-data; name="images"; filename="auditorium.jpg"
+Content-Type: image/jpeg
+
+< ../assets/auditorium.jpg
+------WebKitFormBoundaryAuditorium--
+
+
+### ─────────────────────────────────────────────────────────────
+### VIEW & MANAGEMENT DATA LAPANGAN / SPACES
+### ─────────────────────────────────────────────────────────────
+
+### 9. Ambil Semua Lapangan (Public)
+# Gunakan ini untuk memastikan 'images' melahirkan objek array [ { url, fileId } ] lengkap dari ImageKit!
 GET {{baseUrl}}/spaces
 
 ###
 
-### 7. Ambil Detail Satu Lapangan Berdasarkan ID
-# Ganti ID di bawah dengan _id lapangan yang sukses terbuat dari test sebelumnya
-GET {{baseUrl}}/spaces/6a32aaa81a9da57017e690c2
+### 10. Ambil Detail Satu Lapangan Berdasarkan ID
+# Ganti ID di bawah dengan objek _id yang didapat dari respon pembuatan di atas
+GET {{baseUrl}}/spaces/6a32c53daaadcccb2c0e5161
 
 ###
 
-### 8. Update Data Lapangan (Khusus Owner Pemilik)
-# Ganti ID di bawah sesuai data yang ingin diperbarui
-PUT {{baseUrl}}/spaces/6a32aaa81a9da57017e690c2
+### 11. Update Data Lapangan (Hanya Bisa Diakses Owner Sah)
+# Kirim via JSON biasa jika tidak ingin merubah data berkas gambar utama
+PUT {{baseUrl}}/spaces/6a32c57eaaadcccb2c0e5164
 Content-Type: application/json
 Authorization: Bearer {{tokenOwner}}
 
@@ -201,7 +264,7 @@ Authorization: Bearer {{tokenOwner}}
 
 ###
 
-### 9. Hapus Lapangan (Khusus Owner Pemilik)
-# Ganti ID di bawah jika ingin menguji fitur penghapusan data
-DELETE {{baseUrl}}/spaces/6a2ea1cfa70a4ca1e7eef3bc
+### 12. Hapus Lapangan (Menguji Fitur Auto-Delete File di ImageKit Cloud)
+# Silakan panggil ini dan saksikan foto di dashboard ImageKit ikut lenyap seketika!
+DELETE {{baseUrl}}/spaces/6a32c53daaadcccb2c0e5161
 Authorization: Bearer {{tokenOwner}}

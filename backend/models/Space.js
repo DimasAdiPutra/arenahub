@@ -29,7 +29,12 @@ const SpaceSchema = new mongoose.Schema(
 			type: String,
 			required: [true, 'Lokasi/Alamat wajib diisi'],
 		},
-		images: [String], // Menyimpan array URL gambar lapangan
+		images: [
+			{
+				url: { type: String, required: true },
+				fileId: { type: String, required: true }, // ◄ Kita wajib simpan ini untuk menghapus nanti
+			},
+		], // Menyimpan array URL gambar lapangan
 		facilities: [String], // Contoh: ['Sewa Sepatu', 'Kantin', 'Kamar Mandi']
 	},
 	{
