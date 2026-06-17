@@ -19,14 +19,19 @@ export default function LandingPage() {
       {/* HERO BANNER */}
       <section className="bg-emerald-800 text-white pt-12 pb-24 px-4 sm:px-6 lg:px-8 text-center relative">
         <div className="max-w-3xl mx-auto">
+          {/* Mengubah tagline agar lebih realistis dan berfokus pada solusi kemudahan */}
           <span className="bg-emerald-700/50 text-emerald-300 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-emerald-600/30">
-            #1 Terpercaya di Indonesia
+            Solusi Praktis Sewa Ruang & Arena
           </span>
+
+          {/* Mengubah judul agar mencakup tempat olahraga DAN ruang non-olahraga */}
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight mt-4 leading-tight">
-            Temukan & Booking <br className="hidden sm:inline" /> Tempat Olahraga Favoritmu
+            Temukan & Booking <br className="hidden sm:inline" /> Ruangan dan Arena Favoritmu
           </h1>
+
+          {/* Mengubah deskripsi agar terasa inklusif untuk semua jenis kegiatan (olahraga/acara/rapat) */}
           <p className="mt-3 text-sm sm:text-base text-emerald-100 max-w-xl mx-auto font-medium">
-            Sewa berbagai pilihan arena olahraga secara instan. Cukup pilih jam, bayar, dan langsung main tanpa ribet!
+            Sewa berbagai pilihan arena olahraga dan ruang serbaguna secara instan. Cukup pilih jam, bayar, dan langsung gunakan tanpa ribet!
           </p>
         </div>
       </section>
@@ -46,8 +51,8 @@ export default function LandingPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
           <div>
-            <h2 className="text-xl font-extrabold text-slate-950 tracking-tight">Rekomendasi Arena Terpopuler</h2>
-            <p className="text-xs text-slate-400 font-medium">Fasilitas terbaik pilihan para atlet lokal</p>
+            <h2 className="text-xl font-extrabold text-slate-950 tracking-tight">Rekomendasi Tempat Terpopuler</h2>
+            <p className="text-xs text-slate-400 font-medium">Fasilitas terbaik pilihan komunitas dan pelaku kreatif lokal</p>
           </div>
           <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-md">
             {filteredSpaces.length} Tempat Ditemukan
@@ -80,7 +85,7 @@ export default function LandingPage() {
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 p-6 max-w-md mx-auto">
             <Trophy className="w-12 h-12 text-slate-300 mx-auto stroke-[1.5]" />
             <p className="text-sm font-bold text-slate-800 mt-4">Arena Tidak Ditemukan</p>
-            <p className="text-xs text-slate-400 mt-1">Coba ketik kata kunci lain atau pilih kategori olahraga lainnya.</p>
+            <p className="text-xs text-slate-400 mt-1">Coba ketik kata kunci lain atau pilih kategori lainnya.</p>
           </div>
         )}
 

@@ -9,7 +9,7 @@ export default function SpaceCard({ space }) {
     <div className="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col group">
       <div className="aspect-16/10 bg-slate-100 overflow-hidden relative">
         <img
-          src={(space.images && space.images.length > 0) ? space.images[0] : fallbackImage}
+          src={(space.images && space.images.length > 0) ? `${space.images[0].url}?tr=w-400,h-300,fo-auto` : fallbackImage}
           alt={space.title}
           className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
           onError={(e) => { e.target.src = fallbackImage; }}
