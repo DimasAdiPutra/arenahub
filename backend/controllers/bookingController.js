@@ -123,6 +123,8 @@ exports.getMyBookings = async (req, res, next) => {
 	}
 }
 
+// @desc    Mengambil jam yang sudah di booking agar tidak bisa di pilih user
+// @route   POST /api/bookings/check-availbility
 exports.checkAvailability = async (req, res) => {
 	try {
 		const { spaceId, date } = req.query // date berformat YYYY-MM-DD
