@@ -4,17 +4,40 @@ import { ArrowLeft, CheckCircle, MapPin, Tag, ChevronLeft, ChevronRight } from '
 
 // import components
 import ImageCarousel from '../components/ImageCarousel';
+import Toast from '../components/ui/Toast';
 
 // Import utilities
 import API from '../utils/api';
 
+// import hooks
+import useDocumentTitle from '../hooks/useDocumentTitle'
+import BookingWidget from '../components/BookingWidget';
+
 const DetailPage = () => {
+  useDocumentTitle('Detail Arena')
+
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [space, setSpace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [toastConfig, setToastConfig] = useState({
+    show: false,
+    type: 'success',
+    title: '',
+    message: ''
+  });
+
+  const triggerToast = (type, title, message) => {
+    setToastConfig({ show: true, type, title, message });
+
+    // Otomatis tutup toast setelah 3 detik
+    setTimeout(() => {
+      setToastConfig(prev => ({ ...prev, show: false }));
+    }, 3000);
+  };
 
   // 1. STATE KUSTOM UNTUK CAROUSEL GAMBAR
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
@@ -34,7 +57,6 @@ const DetailPage = () => {
     };
     if (id) fetchSpaceDetail();
   }, [id]);
-
 
   if (loading) return <div className="text-center pt-20">Memuat...</div>;
   if (error || !space) return <div className="text-center pt-20 text-rose-600">{error}</div>;
@@ -105,19 +127,16 @@ const DetailPage = () => {
           </div>
         </div>
 
-        {/* KOLOM KANAN: WIDGET PEMESANAN */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-fit space-y-6">
-          <div>
-            <h2 className="text-lg font-bold text-slate-950 tracking-tight">Widget Pemesanan</h2>
-            <p className="text-xs text-slate-400 font-medium">Harga: <span className="font-extrabold text-emerald-700 text-sm">Rp {space.pricePerHour?.toLocaleString('id-ID')}</span> / jam</p>
-          </div>
-          <div className="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-400 font-medium">
-            Menunggu konfigurasi kalender & jam...
-          </div>
-          <button className="w-full py-3 bg-slate-200 text-slate-400 rounded-xl text-xs font-bold tracking-wide cursor-not-allowed text-center">
-            Lanjutkan ke Pembayaran
-          </button>
-        </div>
+        {/* KOLOM KANAN: WIDGET PEMESANAN INTERAKTIF */}
+        <BookingWidget space={space} triggerToast={triggerToast} />
+
+        {/* KOMPONEN TOAST INTERAKTIF PEMICU NOTIFIKASI */}
+        <Toast
+          show={toastConfig.show}
+          type={toastConfig.type}
+          title={toastConfig.title}
+          message={toastConfig.message}
+        />
 
       </div>
     </div>

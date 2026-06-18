@@ -123,6 +123,50 @@ exports.getMyBookings = async (req, res, next) => {
 	}
 }
 
+exports.checkAvailability = async (req, res) => {
+	try {
+		const { spaceId, date } = req.query // date berformat YYYY-MM-DD
+
+		if (!spaceId || !date) {
+			return res
+				.status(400)
+				.json({ message: 'Space ID dan Tanggal wajib diisi' })
+		}
+
+		// 1. Buat rentang waktu awal hari (00:00:00) dan akhir hari (23:59:59) dalam format Date UTC
+
+		// Cari booking yang statusnya sudah sukses/lunas pada tanggal dan tempat tersebut
+		const activeBookings = await Booking.find({
+			space: spaceId,
+			date,
+			paymentStatus: { $in: ['pending', 'success'] }, // Sesuaikan enum status di DB-mu
+		})
+
+		// Ambil semua jam dari data booking yang ditemukan dan satukan ke dalam satu array
+		// Misal di DB tersimpan sebagai array of strings atau objek
+		let bookedHours = []
+
+		activeBookings.forEach((booking) => {
+			if (booking.bookedHours) {
+				bookedHours = [...bookedHours, ...booking.bookedHours]
+			}
+		})
+
+		// Hilangkan duplikasi angka jam jika ada, lalu urutkan
+		const uniqueBookedHours = [...new Set(bookedHours)].sort((a, b) => a - b)
+
+		return sendSuccess(
+			res,
+			'Booking yang tidak tersedia berhasil diambil',
+			uniqueBookedHours,
+		)
+	} catch (error) {
+		res
+			.status(500)
+			.json({ message: 'Gagal memeriksa ketersediaan', error: error.message })
+	}
+}
+
 // @desc    Menerima notifikasi otomatis (Webhook) dari Midtrans terkait status pembayaran
 // @route   POST /api/bookings/webhook
 exports.handleMidtransNotification = async (req, res, next) => {
