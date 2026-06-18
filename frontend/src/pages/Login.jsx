@@ -8,7 +8,7 @@ import Toast from '../components/ui/Toast';
 import Button from '../components/ui/Button';
 
 export default function Login() {
-  useDocumentTitle('ArenaHub | Masuk ke Akun');
+  useDocumentTitle('Masuk ke Akun');
   const navigate = useNavigate();
   const { login } = useAuth();
 

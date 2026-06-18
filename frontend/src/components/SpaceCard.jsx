@@ -40,7 +40,7 @@ export default function SpaceCard({ space }) {
           </div>
 
           <Link
-            to={`/venue/${space._id || space.id}`}
+            to={`/space/${space._id || space.id}`}
             className="bg-slate-900 text-white p-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 transition flex items-center gap-1.5 shadow-sm"
           >
             <span className="hidden sm:inline">Lihat Detail</span>

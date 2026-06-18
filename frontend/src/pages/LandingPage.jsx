@@ -5,7 +5,7 @@ import SearchFilter from '../components/SearchFilter'; // ◄ Sub-komponen
 import SpaceCard from '../components/SpaceCard'; // ◄ Sub-komponen
 
 export default function LandingPage() {
-  useDocumentTitle('ArenaHub | Sewa Lapangan Olahraga Online Mudah & Cepat');
+  useDocumentTitle('Sewa Arena Online Mudah & Cepat');
 
   // Panggil semua data & fungsi kontrol dari custom hook hanya dengan 1 baris
   const {

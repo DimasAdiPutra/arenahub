@@ -16,7 +16,7 @@ export default function App() {
         {/* 🟩 JALUR UMUM & CUSTOMER (Bisa diakses siapa saja / tanpa login) */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/venue/:id" element={<DetailPage />} />
+          <Route path="/space/:id" element={<DetailPage />} />
 
           {/* 🔏 Jalur Khusus Customer Terautentikasi */}
           {/* Hanya user dengan role 'customer' yang bisa melihat history booking */}

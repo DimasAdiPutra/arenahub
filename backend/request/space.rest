@@ -74,6 +74,13 @@ Content-Disposition: form-data; name="images"; filename="futsal.jpg"
 Content-Type: image/jpeg
 
 < ../assets/futsal.jpg
+
+------WebKitFormBoundaryFutsal
+Content-Disposition: form-data; name="images"; filename="futsal2.jpg"
+Content-Type: image/jpeg
+
+< ../assets/futsal2.jpg
+
 ------WebKitFormBoundaryFutsal--
 
 
@@ -247,7 +254,7 @@ GET {{baseUrl}}/spaces
 
 ### 10. Ambil Detail Satu Lapangan Berdasarkan ID
 # Ganti ID di bawah dengan objek _id yang didapat dari respon pembuatan di atas
-GET {{baseUrl}}/spaces/6a32c53daaadcccb2c0e5161
+GET {{baseUrl}}/spaces/6a33a90678125845108dc15d
 
 ###
 
@@ -266,5 +273,5 @@ Authorization: Bearer {{tokenOwner}}
 
 ### 12. Hapus Lapangan (Menguji Fitur Auto-Delete File di ImageKit Cloud)
 # Silakan panggil ini dan saksikan foto di dashboard ImageKit ikut lenyap seketika!
-DELETE {{baseUrl}}/spaces/6a32c53daaadcccb2c0e5161
+DELETE {{baseUrl}}/spaces/6a32c491aaadcccb2c0e5156
 Authorization: Bearer {{tokenOwner}}

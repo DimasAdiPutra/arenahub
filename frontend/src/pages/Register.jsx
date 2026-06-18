@@ -8,7 +8,7 @@ import Button from '../components/ui/Button';
 import { Hotel, Users } from 'lucide-react';
 
 export default function Register() {
-  useDocumentTitle('ArenaHub | Daftar Akun Baru');
+  useDocumentTitle('Daftar Akun Baru');
   const navigate = useNavigate();
 
   // State Form
