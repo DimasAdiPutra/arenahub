@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import Button from './ui/Button';
 
 import API from '../utils/api'
 
 const BookingWidget = ({ space, triggerToast }) => {
+  const navigate = useNavigate();
+
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTimes, setSelectedTimes] = useState([]); // Array karena user bisa booking > 1 jam sekaligus
   const [bookedHours, setBookedHours] = useState([]); // ◄ State menampung jam yang sudah dibooking
   const [loadingHours, setLoadingHours] = useState(false); // Loading khusus saat cek jam
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
 
   // Generate daftar jam dari 08:00 sampai 22:00
   const availableHours = Array.from({ length: 15 }, (_, i) => {
@@ -98,6 +102,75 @@ const BookingWidget = ({ space, triggerToast }) => {
 
   // Dapatkan tanggal hari ini dengan format YYYY-MM-DD untuk membatasi input tanggal lalu
   const todayStr = new Date().toISOString().split('T')[0];
+
+  // Pemicu midtrans snap
+  const handleCheckout = async () => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Picu toast warning kustom kita
+      triggerToast('warning', 'Akses Terbatas', 'Silakan login terlebih dahulu untuk melakukan pemesanan!');
+
+      // Beri sedikit delay agar user sempat membaca Toast sebelum berpindah halaman
+      setTimeout(() => {
+        navigate('/login'); // Sesuaikan dengan rute halaman login proyekmu
+      }, 1500);
+
+      return; // Hentikan fungsi di sini, jangan lanjut ke proses API
+    }
+
+    setLoadingSubmit(true);
+    try {
+      // 1. Ekstrak string ["08:00", "09:00", "10:00", "11:00"] menjadi array angka [8, 9, 10, 11]
+      const formattedHoursNumbers = selectedTimes.map(t => parseInt(t.split(':')[0]));
+
+      // 2. POTONG ELEMEN JAM TERAKHIR (Klik 8 s/d 11 hanya mengirim [8, 9, 10] ke backend)
+      const hoursToSubmit = formattedHoursNumbers.slice(0, -1);
+
+      // 3. Hit POST ke backend untuk membuat booking & generate token
+      const response = await API.post('/bookings', {
+        space: space._id,
+        date: selectedDate,
+        bookedHours: hoursToSubmit
+      }, {
+        headers: {
+          // Lampirkan token auth user dari localStorage jika backend dilindungi middleware protect
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      console.log(response.data)
+
+      // Ambil snap token dari struktur sendSuccess backend-mu
+      const snapToken = response.data.data.token;
+
+      // 4. Panggil Pop-up Kasir Midtrans Snap secara ajaib
+      window.snap.pay(snapToken, {
+        onSuccess: function (result) {
+          triggerToast('success', 'Pembayaran Sukses!', 'Jadwal lapangan Anda berhasil dipesan.');
+          setSelectedTimes([]); // Reset form jika sukses
+          // Ke depannya di Fase 7, kita bisa redirect user ke halaman riwayat di sini
+        },
+        onPending: function (result) {
+          triggerToast('warning', 'Menunggu Pembayaran', 'Silakan selesaikan pembayaran sebelum batas waktu habis.');
+        },
+        onError: function (result) {
+          triggerToast('error', 'Pembayaran Gagal', 'Transaksi dibatalkan atau terjadi kesalahan sistem.');
+        },
+        onClose: function () {
+          triggerToast('warning', 'Transaksi Tertutup', 'Anda menutup pop-up pembayaran sebelum selesai.');
+        }
+      });
+
+    } catch (err) {
+      // Ambil pesan error spesifik yang dilempar dari backend-mu
+      console.log(err)
+      const errorMessage = err.response?.data?.message || 'Terjadi kesalahan saat membuat pesanan.';
+      triggerToast('error', 'Gagal Booking', errorMessage);
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
 
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-fit space-y-6 lg:sticky lg:top-6">
@@ -205,11 +278,8 @@ const BookingWidget = ({ space, triggerToast }) => {
       <Button
         type="button"
         disabled={!selectedDate || selectedTimes.length < 2}
-        loading={false} // Nanti ini bisa dinamis pakai state saat kita integrasikan ke API payment
-        onClick={() => {
-          // Aksi checkout pembayaran akan ditaruh di sini
-          triggerToast('success', 'Berhasil', 'Melanjutkan ke proses pembayaran...');
-        }}
+        loading={loadingSubmit} // Nanti ini bisa dinamis pakai state saat kita integrasikan ke API payment
+        onClick={handleCheckout}
       >
         Lanjutkan ke Pembayaran
       </Button>
