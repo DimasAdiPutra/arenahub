@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import Button from './ui/Button';
 
 import API from '../utils/api'
+import { getValidToken } from '../utils/auth'
 
 const BookingWidget = ({ space, triggerToast }) => {
   const navigate = useNavigate();
@@ -105,7 +106,16 @@ const BookingWidget = ({ space, triggerToast }) => {
 
   // Pemicu midtrans snap
   const handleCheckout = async () => {
-    const token = localStorage.getItem('token');
+    // 🔒 Panggil fungsi dari file terpisah
+    const token = getValidToken();
+
+    if (!token) {
+      triggerToast('warning', 'Sesi Berakhir', 'Sesi login Anda telah habis atau tidak valid. Silakan login kembali.');
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
+      return;
+    }
 
     if (!token) {
       // Picu toast warning kustom kita
@@ -224,12 +234,26 @@ const BookingWidget = ({ space, triggerToast }) => {
                 // Cek apakah angka jam tersebut ada di dalam array bookedHours dari backend (misal: [14, 15, 16])
                 const isBooked = bookedHours.includes(hourNumber);
 
+                // Cek apakah jam sudah terlewat
+                const todayStr = new Date().toISOString().split('T')[0];
+                let isPastHour = false;
+
+                // Jika tanggal yang dipilih user adalah HARI INI
+                if (selectedDate === todayStr) {
+                  const currentHour = new Date().getHours(); // Ambil jam lokal sekarang (0-23)
+
+                  // Jika jam lapangan tersebut sudah lewat dari jam dinding sekarang, kunci!
+                  if (hourNumber <= currentHour) {
+                    isPastHour = true;
+                  }
+                }
+
                 return (
                   <button
                     key={time}
-                    disabled={isBooked} // Otomatis terkunci jika sudah di-booking
+                    disabled={isBooked || isPastHour} // Otomatis terkunci jika sudah di-booking
                     onClick={() => handleTimeClick(time)}
-                    className={`py-2 text-xs font-bold rounded-xl border transition-all duration-200 ${isBooked
+                    className={`py-2 text-xs font-bold rounded-xl border transition-all duration-200 ${isBooked || isPastHour
                       ? 'bg-slate-100 border-slate-200 text-slate-300 line-through cursor-not-allowed' // Tampilan jam hangus
                       : isSelected
                         ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
