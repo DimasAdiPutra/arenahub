@@ -1,3 +1,5 @@
+const crypto = require('crypto')
+
 const Booking = require('../models/Booking')
 const Space = require('../models/Space')
 const midtransClient = require('midtrans-client')
@@ -178,12 +180,35 @@ exports.handleMidtransNotification = async (req, res, next) => {
 		const orderId = statusResponse.order_id
 		const transactionStatus = statusResponse.transaction_status
 		const fraudStatus = statusResponse.fraud_status
+		const statusCode = statusResponse.status_code
+		const grossAmount = statusResponse.gross_amount
+		const signatureKey = statusResponse.signature_key // ◄ Tangkap signature dari Midtrans
+
+		// =========================================================
+		// 🔒 VERIFIKASI KEASLIAN WEBHOOK (ANTI-MANIPULASI)
+		// =========================================================
+		const serverKey = process.env.MIDTRANS_SERVER_KEY // Ambil Server Key dari .env kamu
+
+		// Rumus SHA512 resmi dari dokumentasi Midtrans
+		const stringToHash = orderId + statusCode + grossAmount + serverKey
+		const localSignature = crypto
+			.createHash('sha512')
+			.update(stringToHash)
+			.digest('hex')
+
+		// Jika signature buatan kita beda dengan yang dikirim Midtrans, tolakan mentah-mentah!
+		if (localSignature !== signatureKey) {
+			res.status(403)
+			throw new Error('Akses ditolak! Signature Key Midtrans tidak valid.')
+		}
 
 		console.log(
-			`[Midtrans Webhook] Order ID: ${orderId} | Status: ${transactionStatus}`,
+			`[Midtrans Webhook Verified] Order ID: ${orderId} | Status: ${transactionStatus}`,
 		)
 
-		// Cari data booking berdasarkan orderId Midtrans
+		// =========================================================
+		// SISA LOGIKA BISNIS KAMU (Sudah Sangat Bagus)
+		// =========================================================
 		const booking = await Booking.findOne({ midtransOrderId: orderId })
 		if (!booking) {
 			res.status(404)
@@ -195,21 +220,21 @@ exports.handleMidtransNotification = async (req, res, next) => {
 			if (fraudStatus === 'challenge') {
 				booking.paymentStatus = 'pending'
 			} else if (fraudStatus === 'accept') {
-				booking.paymentStatus = 'success' // Pembayaran Sah & Berhasil! Lapangan terkunci permanen.
+				booking.paymentStatus = 'success'
 			}
 		} else if (transactionStatus === 'cancel' || transactionStatus === 'deny') {
-			booking.paymentStatus = 'failed' // Pembayaran gagal/ditolak. Slot terbuka kembali.
+			booking.paymentStatus = 'failed'
 		} else if (transactionStatus === 'expire') {
-			booking.paymentStatus = 'expired' // 15 menit lewat dan tidak dibayar! Slot otomatis terbuka kembali.
+			booking.paymentStatus = 'expired'
 		}
 
 		// Simpan perubahan status ke database
 		await booking.save()
 
-		// Berikan respons 200 OK ke Midtrans agar mereka berhenti mengirimkan notifikasi ulang
+		// Berikan respons 200 OK ke Midtrans
 		return res.status(200).json({
 			status: 'OK',
-			message: 'Notifikasi Midtrans berhasil diproses',
+			message: 'Notifikasi Midtrans berhasil diproses dengan aman',
 		})
 	} catch (error) {
 		next(error)
