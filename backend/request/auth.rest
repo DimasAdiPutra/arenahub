@@ -60,3 +60,14 @@ Content-Type: application/json
 
 GET {{baseUrl}}/auth/me
 Authorization: Bearer {{tokenAktif}}
+
+###
+
+# Test NoSql injection
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": { "$ne": "" },
+  "password": { "$ne": "" }
+}

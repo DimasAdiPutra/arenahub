@@ -3,6 +3,8 @@ const cors = require('cors')
 const morgan = require('morgan')
 const dns = require('node:dns/promises')
 
+const { sanitize } = require('./middleware/sanitizeMiddleware.js')
+
 // Hanya gunakan DNS Google/Cloudflare jika berjalan di komputer lokal (development)
 if (process.env.NODE_ENV !== 'production') {
 	dns.setServers(['8.8.8.8', '1.1.1.1'])
@@ -29,6 +31,10 @@ connectDB()
 // Middleware Global
 app.use(cors()) // Mengizinkan frontend (Vite) untuk mengakses API ini
 app.use(express.json()) // Mengizinkan Express membaca data berformat JSON dari body request
+
+app.use((req, res, next) => {
+	sanitize(req, res, next)
+})
 
 // logging dengan morgan
 app.use(morgan('dev'))

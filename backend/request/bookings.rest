@@ -35,7 +35,8 @@ Authorization: Bearer {{tokenCustomer}}
 {
   "space": "{{idLapangan}}",
   "date": "2026-06-20",
-  "bookedHours": [14, 15, 16]
+  "bookedHours": [17],
+  "totalPrice": 0
 }
 
 

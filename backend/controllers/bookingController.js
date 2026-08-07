@@ -18,6 +18,32 @@ exports.createBooking = async (req, res, next) => {
 	try {
 		const { space: spaceId, date, bookedHours } = req.body
 
+		// =========================================================
+		// 🕒 VALIDASI ANTI-TANGGAL KEDALUWARSA
+		// =========================================================
+		const todayStr = new Date().toISOString().split('T')[0] // Format: YYYY-MM-DD
+
+		if (date < todayStr) {
+			res.status(400)
+			throw new Error(
+				'Gagal booking! Anda tidak bisa memesan tanggal yang sudah terlewat.',
+			)
+		}
+
+		// Jika tanggalnya adalah hari ini, cek juga apakah jamnya sudah terlewat
+		if (date === todayStr) {
+			const currentHour = new Date().getHours()
+			// Cek apakah ada jam yang dipilih yang sudah kurang dari atau sama dengan jam sekarang
+			const hasPastHour = bookedHours.some((hour) => hour <= currentHour)
+
+			if (hasPastHour) {
+				res.status(400)
+				throw new Error(
+					'Gagal booking! Salah satu slot jam yang Anda pilih sudah terlewat untuk hari ini.',
+				)
+			}
+		}
+
 		if (
 			!bookedHours ||
 			!Array.isArray(bookedHours) ||
