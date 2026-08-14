@@ -17,7 +17,7 @@ export default function SearchFilter({
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Cari nama tempat atau lokasi arena..."
+          placeholder="Cari nama arena atau lokasi arena..."
           className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 text-sm transition"
         />
       </div>

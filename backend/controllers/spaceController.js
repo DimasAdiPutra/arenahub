@@ -4,7 +4,7 @@ const { sendSuccess } = require('../utils/responseHandler')
 const mongoose = require('mongoose')
 const { imagekit, toFile } = require('../config/imagekit')
 
-// @desc    Tambah Lapangan/Tempat Baru (Owner Only)
+// @desc    Tambah Arena/Arena Baru (Owner Only)
 // @route   POST /api/spaces
 exports.createSpace = async (req, res, next) => {
 	// 1. Definisikan array imageUrls di luar blok try agar bisa diakses oleh blok catch jika terjadi error
@@ -70,7 +70,7 @@ exports.createSpace = async (req, res, next) => {
 			images: imageUrls,
 		})
 
-		return sendSuccess(res, 'Tempat/Lapangan berhasil didaftarkan', space, 201)
+		return sendSuccess(res, 'Arena/Arena berhasil didaftarkan', space, 201)
 	} catch (error) {
 		// ─── 6. BLOK ROLLBACK OTOMATIS JIKA DB GAGAL SIMPAN ───
 		if (imageUrls.length > 0) {
@@ -98,7 +98,7 @@ exports.createSpace = async (req, res, next) => {
 	}
 }
 
-// @desc    Ambil Semua Lapangan (Public)
+// @desc    Ambil Semua Arena (Public)
 // @route   GET /api/spaces
 exports.getAllSpaces = async (req, res, next) => {
 	try {
@@ -106,13 +106,13 @@ exports.getAllSpaces = async (req, res, next) => {
 			.populate('category', 'name slug')
 			.populate('owner', 'name email phoneNumber')
 
-		return sendSuccess(res, 'Daftar lapangan berhasil diambil', spaces)
+		return sendSuccess(res, 'Daftar arena berhasil diambil', spaces)
 	} catch (error) {
 		next(error)
 	}
 }
 
-// @desc    Ambil Detail Satu Lapangan Berdasarkan ID
+// @desc    Ambil Detail Satu Arena Berdasarkan ID
 // @route   GET /api/spaces/:id
 exports.getSpaceById = async (req, res, next) => {
 	try {
@@ -122,16 +122,16 @@ exports.getSpaceById = async (req, res, next) => {
 
 		if (!space) {
 			res.status(404)
-			throw new Error('Lapangan/Tempat tidak ditemukan')
+			throw new Error('Arena/Arena tidak ditemukan')
 		}
 
-		return sendSuccess(res, 'Detail lapangan berhasil diambil', space)
+		return sendSuccess(res, 'Detail arena berhasil diambil', space)
 	} catch (error) {
 		next(error)
 	}
 }
 
-// @desc    Update Data Lapangan (Owner Only)
+// @desc    Update Data Arena (Owner Only)
 // @route   PUT /api/spaces/:id
 exports.updateSpace = async (req, res, next) => {
 	try {
@@ -139,13 +139,13 @@ exports.updateSpace = async (req, res, next) => {
 
 		if (!space) {
 			res.status(404)
-			throw new Error('Lapangan/Tempat tidak ditemukan')
+			throw new Error('Arena/Arena tidak ditemukan')
 		}
 
 		if (space.owner.toString() !== req.user.id) {
 			res.status(403)
 			throw new Error(
-				'Anda tidak memiliki hak akses untuk mengubah data lapangan ini',
+				'Anda tidak memiliki hak akses untuk mengubah data arena ini',
 			)
 		}
 
@@ -186,13 +186,13 @@ exports.updateSpace = async (req, res, next) => {
 			runValidators: true,
 		})
 
-		return sendSuccess(res, 'Data lapangan berhasil diperbarui', space)
+		return sendSuccess(res, 'Data arena berhasil diperbarui', space)
 	} catch (error) {
 		next(error)
 	}
 }
 
-// @desc    Hapus Lapangan (Owner Only)
+// @desc    Hapus Arena (Owner Only)
 // @route   DELETE /api/spaces/:id
 exports.deleteSpace = async (req, res, next) => {
 	try {
@@ -200,15 +200,13 @@ exports.deleteSpace = async (req, res, next) => {
 
 		if (!space) {
 			res.status(404)
-			throw new Error('Lapangan/Tempat tidak ditemukan')
+			throw new Error('Arena/Arena tidak ditemukan')
 		}
 
 		// PROTEKSI: Pastikan owner yang mau hapus adalah pemilik sahnya
 		if (space.owner.toString() !== req.user.id) {
 			res.status(403)
-			throw new Error(
-				'Anda tidak memiliki hak akses untuk menghapus lapangan ini',
-			)
+			throw new Error('Anda tidak memiliki hak akses untuk menghapus arena ini')
 		}
 
 		// 🟢 PROSES PEMBERSIHAN OTOMATIS DI IMAGEKIT
@@ -236,7 +234,7 @@ exports.deleteSpace = async (req, res, next) => {
 
 		return sendSuccess(
 			res,
-			'Lapangan dan seluruh aset gambar berhasil dihapus dari sistem',
+			'Arena dan seluruh aset gambar berhasil dihapus dari sistem',
 		)
 	} catch (error) {
 		next(error)

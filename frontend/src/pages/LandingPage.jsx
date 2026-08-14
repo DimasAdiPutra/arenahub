@@ -24,7 +24,7 @@ export default function LandingPage() {
             Solusi Praktis Sewa Ruang & Arena
           </span>
 
-          {/* Mengubah judul agar mencakup tempat olahraga DAN ruang non-olahraga */}
+          {/* Mengubah judul agar mencakup arena olahraga DAN ruang non-olahraga */}
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight mt-4 leading-tight">
             Temukan & Booking <br className="hidden sm:inline" /> Ruangan dan Arena Favoritmu
           </h1>
@@ -51,11 +51,11 @@ export default function LandingPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
           <div>
-            <h2 className="text-xl font-extrabold text-slate-950 tracking-tight">Rekomendasi Tempat Terpopuler</h2>
+            <h2 className="text-xl font-extrabold text-slate-950 tracking-tight">Rekomendasi Arena Terpopuler</h2>
             <p className="text-xs text-slate-400 font-medium">Fasilitas terbaik pilihan komunitas dan pelaku kreatif lokal</p>
           </div>
           <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-md">
-            {filteredSpaces.length} Tempat Ditemukan
+            {filteredSpaces.length} Arena Ditemukan
           </span>
         </div>
 

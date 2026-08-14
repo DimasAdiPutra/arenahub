@@ -5,7 +5,7 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 import Toast from '../components/ui/Toast';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
-import { Hotel, Users } from 'lucide-react';
+import { Hotel, Users } from 'lucide-react'; // ◄ Tambahkan Eye dan EyeOff
 
 export default function Register() {
   useDocumentTitle('Daftar Akun Baru');
@@ -18,10 +18,28 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('customer');
 
-  // State Status & Elemen Elegan
+  // State Status & Preview
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showToast, setShowToast] = useState(false); // ◄ State pemicu notifikasi sukses
+  const [showToast, setShowToast] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // ◄ State untuk Toggle Password
+
+  // ==========================================
+  // 🔒 LOGIKA VALIDASI FRONTEND
+  // ==========================================
+
+  // 1. Handler Khusus Nomor Telepon (Hanya Menerima Angka)
+  const handlePhoneChange = (e) => {
+    const onlyNums = e.target.value.replace(/\D/g, ''); // Hapus semua karakter selain angka
+    setPhoneNumber(onlyNums);
+  };
+
+  // 2. Helper Pengecekan Syarat Password
+  const isMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /\d/.test(password); // Mengecek apakah ada angka
+  const isPasswordValid = isMinLength && hasUppercase && hasLowercase && hasNumber;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,10 +55,8 @@ export default function Register() {
         role
       });
 
-      // 🟢 GANTI ALERT: Munculkan notifikasi melayang yang manis
       setShowToast(true);
 
-      // Tunggu 2.5 detik agar user sempat membaca, lalu pindah halaman otomatis
       setTimeout(() => {
         setShowToast(false);
         navigate('/login');
@@ -57,8 +73,6 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans antialiased relative">
-
-      {/* 🟢 BANNER NOTIFIKASI TOAST MELAYANG (Muncul dari atas layar) */}
       <Toast show={showToast} title="Pendaftaran Berhasil!" message="Mengalihkan Anda ke halaman masuk..." />
 
       <div className="sm:mx-auto w-full max-w-md">
@@ -83,7 +97,6 @@ export default function Register() {
           )}
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-            {/* ... bagian input Form sama persis dengan kode sebelumnya ... */}
             <div>
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Daftar Sebagai Apa?</label>
               <div className="grid grid-cols-2 gap-3">
@@ -101,26 +114,51 @@ export default function Register() {
             </div>
 
             <Input
-              label="Name" id="name" type="text" required
+              label="Nama" id="name" type="text" required
               value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe"
             />
 
             <Input
               label="Alamat Email" id="email" type="email" required
-              value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com  "
+              value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com"
             />
 
             <Input
               label="Nomor Telepon / WhatsApp" id="phone" type="tel" required
-              value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="081234567890"
+              value={phoneNumber} onChange={handlePhoneChange} placeholder="081234567890"
             />
 
-            <Input
-              label="Password" id="password" type="password" required
-              value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
-            />
+            {/* 🟢 BLOK PASSWORD SEKARANG JAUH LEBIH BERSIH */}
+            <div>
+              <Input
+                label="Password" id="password" type="password" required
+                value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
+              />
 
-            <Button type="submit" loading={loading}>
+              {/* Indikator Kekuatan Password tetap ditaruh di sini */}
+              {password.length > 0 && (
+                <div className="mt-2 text-xs space-y-1 bg-slate-50 p-2 rounded border border-slate-100">
+                  <p className={isMinLength ? "text-emerald-600 font-medium flex items-center gap-1" : "text-slate-400 flex items-center gap-1"}>
+                    <span>{isMinLength ? "✓" : "○"}</span> Minimal 8 karakter
+                  </p>
+                  <p className={hasUppercase ? "text-emerald-600 font-medium flex items-center gap-1" : "text-slate-400 flex items-center gap-1"}>
+                    <span>{hasUppercase ? "✓" : "○"}</span> Minimal 1 huruf kapital
+                  </p>
+                  <p className={hasLowercase ? "text-emerald-600 font-medium flex items-center gap-1" : "text-slate-400 flex items-center gap-1"}>
+                    <span>{hasLowercase ? "✓" : "○"}</span> Minimal 1 huruf kecil
+                  </p>
+                  <p className={hasNumber ? "text-emerald-600 font-medium flex items-center gap-1" : "text-slate-400 flex items-center gap-1"}>
+                    <span>{hasNumber ? "✓" : "○"}</span> Minimal 1 angka
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              loading={loading}
+              disabled={!isPasswordValid || phoneNumber.length < 10}
+            >
               Daftar Akun Sekarang
             </Button>
           </form>

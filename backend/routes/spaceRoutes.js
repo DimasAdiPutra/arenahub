@@ -39,7 +39,7 @@ router
 // Jalur: /api/spaces/:id
 router
 	.route('/:id')
-	.get(getSpaceById) // Publik: Siapa pun bisa lihat detail lapangan
+	.get(getSpaceById) // Publik: Siapa pun bisa lihat detail arena
 	.put(protect, authorize('owner'), updateSpace) // Privat: Hanya owner pemiliknya
 	.delete(protect, authorize('owner'), deleteSpace) // Privat: Hanya owner pemiliknya
 

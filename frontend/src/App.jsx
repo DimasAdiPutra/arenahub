@@ -29,7 +29,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* 👑 JALUR PEMILIK LAPANGAN (Owner Only) */}
+        {/* 👑 JALUR PEMILIK ARENA (Owner Only) */}
         {/* Mengunci rute dashboard agar tidak bisa diintip oleh customer biasa */}
         <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
           <Route path="/owner/dashboard" element={<OwnerDashboard />} />

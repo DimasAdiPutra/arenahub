@@ -36,7 +36,7 @@ const BookingWidget = ({ space, triggerToast }) => {
         setBookedHours(response.data.data || []);
       } catch (err) {
         console.error(err)
-        triggerToast('error', 'Gagal', 'Gagal memuat jadwal ketersediaan lapangan.');
+        triggerToast('error', 'Gagal', 'Gagal memuat jadwal ketersediaan arena.');
       } finally {
         setLoadingHours(false);
       }
@@ -157,7 +157,7 @@ const BookingWidget = ({ space, triggerToast }) => {
       // 4. Panggil Pop-up Kasir Midtrans Snap secara ajaib
       window.snap.pay(snapToken, {
         onSuccess: function (result) {
-          triggerToast('success', 'Pembayaran Sukses!', 'Jadwal lapangan Anda berhasil dipesan.');
+          triggerToast('success', 'Pembayaran Sukses!', 'Jadwal arena Anda berhasil dipesan.');
           setSelectedTimes([]); // Reset form jika sukses
           // Ke depannya di Fase 7, kita bisa redirect user ke halaman riwayat di sini
         },
@@ -242,7 +242,7 @@ const BookingWidget = ({ space, triggerToast }) => {
                 if (selectedDate === todayStr) {
                   const currentHour = new Date().getHours(); // Ambil jam lokal sekarang (0-23)
 
-                  // Jika jam lapangan tersebut sudah lewat dari jam dinding sekarang, kunci!
+                  // Jika jam arena tersebut sudah lewat dari jam dinding sekarang, kunci!
                   if (hourNumber <= currentHour) {
                     isPastHour = true;
                   }

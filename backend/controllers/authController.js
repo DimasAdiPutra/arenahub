@@ -7,6 +7,25 @@ exports.registerUser = async (req, res, next) => {
 	try {
 		const { name, email, password, role, phoneNumber } = req.body
 
+		console.log(phoneNumber)
+
+		// 1. Validasi Nomor Telepon (Hanya Boleh Angka, Min 10, Max 15 digit)
+		const phoneRegex = /^[0-9]+$/
+		if (!phoneRegex.test(phoneNumber)) {
+			res.status(400)
+			throw new Error('Nomor telepon hanya boleh berisi angka!')
+		}
+
+		// 2. Validasi Kekuatan Password (Min 8 karakter, Min 1 Huruf Besar, Min 1 Huruf Kecil)
+		// Regex: (?=.*[a-z]) -> min 1 huruf kecil, (?=.*[A-Z]) -> min 1 huruf besar, {8,} -> min 8 karakter
+		const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
+		if (!passwordRegex.test(password)) {
+			res.status(400)
+			throw new Error(
+				'Password harus minimal 8 karakter, mengandung minimal 1 huruf besar dan 1 huruf kecil!',
+			)
+		}
+
 		const userExists = await User.findOne({ email })
 		if (userExists) {
 			res.status(400)
@@ -19,6 +38,7 @@ exports.registerUser = async (req, res, next) => {
 		const user = await User.create({
 			name,
 			email,
+			phoneNumber,
 			password: hashedPassword,
 			role,
 			phoneNumber,

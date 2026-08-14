@@ -26,7 +26,7 @@ export default function useSpaces() {
 
 				setSpaces(spacesData)
 
-				// ✨ Masukkan opsi 'Semua' di awal array kategori agar user tetap bisa melihat seluruh lapangan
+				// ✨ Masukkan opsi 'Semua' di awal array kategori agar user tetap bisa melihat seluruh arena
 				setCategories([
 					{ _id: 'all', name: 'Semua', slug: 'all' },
 					...categoriesData,

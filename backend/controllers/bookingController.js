@@ -50,13 +50,13 @@ exports.createBooking = async (req, res, next) => {
 			bookedHours.length === 0
 		) {
 			res.status(400)
-			throw new Error('Pilihlah minimal 1 jam slot lapangan')
+			throw new Error('Pilihlah minimal 1 jam slot arena')
 		}
 
 		const space = await Space.findById(spaceId)
 		if (!space) {
 			res.status(404)
-			throw new Error('Lapangan tidak ditemukan')
+			throw new Error('Arena tidak ditemukan')
 		}
 
 		// 2. Cek apakah slot jam sudah terisi (Hanya mengunci status pending & success)
@@ -165,7 +165,7 @@ exports.checkAvailability = async (req, res) => {
 
 		// 1. Buat rentang waktu awal hari (00:00:00) dan akhir hari (23:59:59) dalam format Date UTC
 
-		// Cari booking yang statusnya sudah sukses/lunas pada tanggal dan tempat tersebut
+		// Cari booking yang statusnya sudah sukses/lunas pada tanggal dan arena tersebut
 		const activeBookings = await Booking.find({
 			space: spaceId,
 			date,

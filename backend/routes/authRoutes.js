@@ -24,7 +24,7 @@ router.get('/me', protect, (req, res) => {
 router.get('/owner-only', protect, authorize('owner'), (req, res) => {
 	res.json({
 		success: true,
-		message: 'Selamat datang di area rahasia Owner Lapangan!',
+		message: 'Selamat datang di area rahasia Owner Arena!',
 	})
 })
 

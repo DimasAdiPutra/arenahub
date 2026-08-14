@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 
 import { Bolt, ChevronDown, LogOut, Menu, X } from 'lucide-react'
 import Toast from './ui/Toast';
 
 export default function Navbar() {
+  const navigate = useNavigate()
+
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false); // Untuk dropdown mobile
   const [desktopDropdownOpen, setDesktopDropdownOpen] = useState(false); // Untuk dropdown desktop
@@ -97,7 +99,7 @@ export default function Navbar() {
                     Account Settings
                   </button>
                   <div className="border-t border-slate-100 my-1"></div>
-                  <button onClick={() => { setDesktopDropdownOpen(false); logout(); }} className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold transition">
+                  <button onClick={() => { setDesktopDropdownOpen(false); logout(); navigate('/'); }} className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold transition">
                     Logout Account
                   </button>
                 </div>
@@ -184,7 +186,7 @@ export default function Navbar() {
               </button>
 
               <button
-                onClick={() => { setMenuOpen(false); logout(); }}
+                onClick={() => { setMenuOpen(false); logout(); navigate('/') }}
                 className="w-full text-left text-sm font-bold text-red-600 py-1 transition flex items-center gap-2"
               >
                 <LogOut className="w-4 h-4 text-red-500" strokeWidth={2.5} />

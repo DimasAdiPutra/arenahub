@@ -50,7 +50,7 @@ const DetailPage = () => {
         setSpace(response.data.data);
       } catch (err) {
         console.error('Gagal memuat data detail space:', err);
-        setError(err.response?.data?.message || 'Gagal mengambil detail tempat.');
+        setError(err.response?.data?.message || 'Gagal mengambil detail arena.');
       } finally {
         setLoading(false);
       }
@@ -121,7 +121,7 @@ const DetailPage = () => {
 
             {/* Deskripsi */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Deskripsi Tempat</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Deskripsi Arena</h3>
               <p className="text-sm text-slate-600 leading-relaxed font-medium">{space.description}</p>
             </div>
           </div>
