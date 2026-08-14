@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import OwnerDashboard from './pages/OwnerDashboard';
 import ProtectedRoute from './components/ProtectedRoute'; // ◄ Import pelindung rute
+import OwnerLayout from './layouts/OwnerLayout';
 
 export default function App() {
   return (
@@ -30,9 +31,12 @@ export default function App() {
         <Route path="/register" element={<Register />} />
 
         {/* 👑 JALUR PEMILIK ARENA (Owner Only) */}
-        {/* Mengunci rute dashboard agar tidak bisa diintip oleh customer biasa */}
         <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
-          <Route path="/owner/dashboard" element={<OwnerDashboard />} />
+          <Route element={<OwnerLayout />}>
+            <Route path="/owner/dashboard" element={<OwnerDashboard />} />
+            {/* Nanti halaman tambah lapangan bisa ditaruh di sini juga */}
+            {/* <Route path="/owner/spaces/create" element={<CreateSpacePage />} /> */}
+          </Route>
         </Route>
 
       </Routes>
