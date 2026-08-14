@@ -110,6 +110,7 @@ exports.createBooking = async (req, res, next) => {
 
 		// 5. Tembak ke Midtrans untuk mendapatkan Snap Token / Redirect URL
 		const transaction = await snap.createTransaction(parameter)
+		const snapToken = transaction.token
 
 		// 6. Simpan data booking ke database (Status default awal adalah 'pending')
 		const booking = await Booking.create({
@@ -119,6 +120,7 @@ exports.createBooking = async (req, res, next) => {
 			bookedHours,
 			totalPrice,
 			midtransOrderId,
+			snapToken,
 		})
 
 		// 7. Kembalikan data booking beserta snapToken & snapUrl ke frontend
@@ -127,7 +129,6 @@ exports.createBooking = async (req, res, next) => {
 			'Booking berhasil dibuat, silakan selesaikan pembayaran dalam 15 menit',
 			{
 				booking,
-				token: transaction.token, // Digunakan Frontend jika pakai Snap Pop-up SDK
 				redirect_url: transaction.redirect_url, // Digunakan Frontend jika mau langsung redirect ke web Midtrans
 			},
 			201,

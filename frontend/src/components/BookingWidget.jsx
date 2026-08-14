@@ -152,7 +152,7 @@ const BookingWidget = ({ space, triggerToast }) => {
       console.log(response.data)
 
       // Ambil snap token dari struktur sendSuccess backend-mu
-      const snapToken = response.data.data.token;
+      const snapToken = response.data.data.booking.snapToken;
 
       // 4. Panggil Pop-up Kasir Midtrans Snap secara ajaib
       window.snap.pay(snapToken, {

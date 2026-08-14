@@ -34,6 +34,9 @@ const BookingSchema = new mongoose.Schema(
 			unique: true,
 			required: true,
 		},
+		snapToken: {
+			type: String,
+		},
 	},
 	{
 		timestamps: true,
