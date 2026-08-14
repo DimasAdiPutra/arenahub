@@ -24,6 +24,7 @@ import {
 import { id } from 'date-fns/locale'; // Untuk lokalisasi bahasa Indonesia
 import API from '../utils/api';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import { formatCompactCurrency } from '../utils/formatters';
 
 export default function OwnerDashboard() {
   useDocumentTitle('Owner Dashboard');
@@ -53,13 +54,6 @@ export default function OwnerDashboard() {
     } catch (error) {
       console.error("Gagal mengambil data dashboard", error);
     }
-  };
-
-  // Helper: Format Rupiah Singkat (Misal: Rp 1.50k, Rp 2.40M)
-  const formatCompactCurrency = (value) => {
-    if (value >= 1000000) return `Rp ${(value / 1000000).toFixed(2)}M`;
-    if (value >= 1000) return `Rp ${(value / 1000).toFixed(2)}k`;
-    return `Rp ${value || 0}`;
   };
 
   // ==========================================

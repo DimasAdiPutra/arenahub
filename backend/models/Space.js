@@ -9,7 +9,7 @@ const SpaceSchema = new mongoose.Schema(
 		},
 		title: {
 			type: String,
-			required: [true, 'Nama arena wajib diisi'],
+			required: [true, 'Nama tempat/lapangan wajib diisi'],
 			trim: true,
 		},
 		description: {
@@ -34,7 +34,7 @@ const SpaceSchema = new mongoose.Schema(
 				url: { type: String, required: true },
 				fileId: { type: String, required: true }, // ◄ Kita wajib simpan ini untuk menghapus nanti
 			},
-		], // Menyimpan array URL gambar arena
+		], // Menyimpan array URL gambar lapangan
 		facilities: [String], // Contoh: ['Sewa Sepatu', 'Kantin', 'Kamar Mandi']
 	},
 	{
