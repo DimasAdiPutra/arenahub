@@ -11,6 +11,7 @@ import BookingWidget from '../components/BookingWidget';
 import { useAuth } from '../context/AuthContext'; // ◄ 1. Import AuthContext
 import API from '../utils/api';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import Button from '../components/ui/Button';
 
 const DetailPage = () => {
   useDocumentTitle('Detail Arena');
@@ -149,12 +150,13 @@ const DetailPage = () => {
                 <p><span className="font-bold text-slate-700">Status:</span> Aktif di Katalog</p>
               </div>
 
-              <button
+              <Button
+                variant="primary"
+                size="md"
                 onClick={() => navigate(`/owner/spaces/edit/${space._id}`)}
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
               >
                 Edit Informasi Arena
-              </button>
+              </Button>
             </div>
           ) : (
             /* 🌐 WIDGET PEMESANAN NORMAL UNTUK CUSTOMER & OWNER LAIN */

@@ -1,4 +1,5 @@
 import { AlertTriangle, X } from 'lucide-react';
+import Button from './Button';
 
 export default function ConfirmModal({ isOpen, onClose, onConfirm, title, message, loading }) {
   if (!isOpen) return null;
@@ -28,25 +29,26 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
         </div>
 
         {/* Tombol Aksi */}
-        <div className="flex border-t border-slate-100">
-          <button
-            onClick={onClose}
+        <div className="flex border-t border-slate-100 p-3 gap-2">
+          <Button
+            variant="ghost"
+            size="md"
+            fullWidth={true}
             disabled={loading}
-            className="flex-1 px-4 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition border-r border-slate-100 disabled:opacity-50"
+            onClick={onClose}
           >
             Batal
-          </button>
-          <button
+          </Button>
+
+          <Button
+            variant="danger"
+            size="md"
+            fullWidth={true}
+            loading={loading}
             onClick={onConfirm}
-            disabled={loading}
-            className="flex-1 px-4 py-3.5 text-sm font-bold text-rose-600 hover:bg-rose-50 transition disabled:opacity-50 flex justify-center items-center gap-2"
           >
-            {loading ? (
-              <span className="animate-pulse">Menghapus...</span>
-            ) : (
-              'Ya, Hapus'
-            )}
-          </button>
+            Ya, Hapus
+          </Button>
         </div>
       </div>
     </div>

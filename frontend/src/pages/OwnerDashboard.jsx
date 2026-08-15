@@ -25,6 +25,7 @@ import { id } from 'date-fns/locale'; // Untuk lokalisasi bahasa Indonesia
 import API from '../utils/api';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { formatCompactCurrency } from '../utils/formatters';
+import Button from '../components/ui/Button';
 
 export default function OwnerDashboard() {
   useDocumentTitle('Owner Dashboard');
@@ -116,13 +117,16 @@ export default function OwnerDashboard() {
           </div>
 
           {/* Tombol Form Tambah Lapangan (Persiapan Upload Multipart) */}
-          <Link
+          <Button
             to="/owner/spaces/create"
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95 transition-all"
+            variant="primary"
+            size="md"
+            fullWidth={false}
+            className="gap-2 shadow-sm shadow-emerald-600/20"
           >
             <PlusCircle size={18} />
-            Tambah Lapangan
-          </Link>
+            Tambah Arena
+          </Button>
         </div>
 
         {/* 🟢 TOP CARD ANALYTICS PANEL */}

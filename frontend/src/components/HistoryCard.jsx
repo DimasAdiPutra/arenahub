@@ -1,5 +1,6 @@
 import React from 'react';
 import { MapPin, AlertTriangle } from 'lucide-react';
+import Button from './ui/Button';
 
 export default function HistoryCard({ booking, onPay, isExpired }) {
   // Helper Formatter
@@ -99,12 +100,15 @@ export default function HistoryCard({ booking, onPay, isExpired }) {
 
         {/* Tombol Bayar Darurat (Disembunyikan jika arena sudah dihapus) */}
         {!isDeleted && isPending && !isExpired && booking.snapToken && (
-          <button
+          <Button
+            variant="primary"
+            size="sm"
+            fullWidth={false}
             onClick={() => onPay(booking.snapToken)}
-            className="px-5 py-2 sm:px-6 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95 transition-all"
+            className="px-5 py-2 shadow-sm shadow-emerald-600/20"
           >
             Bayar
-          </button>
+          </Button>
         )}
       </div>
     </div>
