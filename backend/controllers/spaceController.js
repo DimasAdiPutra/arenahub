@@ -1,20 +1,93 @@
 const Space = require('../models/Space')
 const Category = require('../models/Category')
+const Booking = require('../models/Booking') // ◄ Diperlukan untuk statistik dashboard owner
 const { sendSuccess } = require('../utils/responseHandler')
 const mongoose = require('mongoose')
 const { imagekit, toFile } = require('../config/imagekit')
 
-// @desc    Tambah Arena/Arena Baru (Owner Only)
+// ==========================================
+// 👑 FUNGSI KHUSUS DASHBOARD OWNER
+// ==========================================
+
+// @desc    Ambil Statistik & Data Dashboard Owner
+// @route   GET /api/owner/dashboard
+exports.getOwnerDashboardData = async (req, res, next) => {
+	try {
+		const ownerId = req.user.id
+
+		// 1. Cari semua lapangan yang dimiliki oleh owner yang sedang login
+		const ownerSpaces = await Space.find({ owner: ownerId })
+		const spaceIds = ownerSpaces.map((space) => space._id)
+
+		// 2. Ambil hanya booking sukses yang melibatkan lapangan milik owner ini
+		const allSuccessBookings = await Booking.find({
+			space: { $in: spaceIds },
+			paymentStatus: 'success',
+		})
+			.populate('space', 'title pricePerHour')
+			.sort({ date: -1 })
+
+		// 3. Hitung Statistik
+		const totalBookings = allSuccessBookings.length
+		const totalHours = allSuccessBookings.reduce(
+			(acc, curr) => acc + curr.bookedHours.length,
+			0,
+		)
+		const revenue = allSuccessBookings.reduce(
+			(acc, curr) => acc + curr.totalPrice,
+			0,
+		)
+		const activeSpaces = ownerSpaces.length
+
+		// 4. Ambil 10 transaksi terbaru untuk list bagian kiri
+		const recent = await Booking.find({ space: { $in: spaceIds } })
+			.populate('space', 'title')
+			.sort({ createdAt: -1 })
+			.limit(10)
+
+		return sendSuccess(res, 'Data dashboard owner berhasil dimuat', {
+			statistics: {
+				totalBookings,
+				totalHours,
+				revenue,
+				activeSpaces,
+			},
+			recent,
+			allSuccessBookings,
+		})
+	} catch (error) {
+		next(error)
+	}
+}
+
+// @desc    Ambil Khusus Daftar Arena Milik Owner yang Login
+// @route   GET /api/owner/spaces
+exports.getOwnerSpaces = async (req, res, next) => {
+	try {
+		const spaces = await Space.find({ owner: req.user.id })
+			.populate('category', 'name slug')
+			.sort({ createdAt: -1 })
+
+		return sendSuccess(res, 'Daftar arena owner berhasil dimuat', spaces)
+	} catch (error) {
+		next(error)
+	}
+}
+
+// ==========================================
+// 🌐 FUNGSI UMUM & CRUD ARENA (Milikmu)
+// ==========================================
+
+// @desc    Tambah Arena Baru (Owner Only)
 // @route   POST /api/spaces
 exports.createSpace = async (req, res, next) => {
-	// 1. Definisikan array imageUrls di luar blok try agar bisa diakses oleh blok catch jika terjadi error
 	let imageUrls = []
 
 	try {
 		let { title, description, category, pricePerHour, location, facilities } =
 			req.body
 
-		// ─── 2. PROSES UPLOAD GAMBAR KE IMAGEKIT ───
+		// 1. Proses Upload Gambar ke ImageKit
 		if (req.files && req.files.length > 0) {
 			for (const file of req.files) {
 				const uniqueFileName = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`
@@ -25,7 +98,6 @@ exports.createSpace = async (req, res, next) => {
 					folder: '/arenahub',
 				})
 
-				// Simpan url dan fileId ke array eksternal
 				imageUrls.push({
 					url: uploadResponse.url,
 					fileId: uploadResponse.fileId,
@@ -33,7 +105,7 @@ exports.createSpace = async (req, res, next) => {
 			}
 		}
 
-		// ─── 3. LOGIKA OTOMATISASI KATEGORI DINAMIS ───
+		// 2. Logika Otomatisasi Kategori Dinamis
 		const isObjectId = mongoose.Types.ObjectId.isValid(category)
 
 		if (!isObjectId && category) {
@@ -49,7 +121,7 @@ exports.createSpace = async (req, res, next) => {
 			category = existingCategory._id
 		}
 
-		// ─── 4. PARSING ANTISIPASI FORMAT MULTIPART ───
+		// 3. Parsing Fasilitas
 		if (typeof facilities === 'string') {
 			try {
 				facilities = JSON.parse(facilities)
@@ -58,7 +130,7 @@ exports.createSpace = async (req, res, next) => {
 			}
 		}
 
-		// ─── 5. SIMPAN DATA KE MONGOOSE (Memicu validasi skema) ───
+		// 4. Simpan ke Database
 		const space = await Space.create({
 			owner: req.user.id,
 			title,
@@ -70,30 +142,18 @@ exports.createSpace = async (req, res, next) => {
 			images: imageUrls,
 		})
 
-		return sendSuccess(res, 'Arena/Arena berhasil didaftarkan', space, 201)
+		return sendSuccess(res, 'Arena berhasil didaftarkan', space, 201)
 	} catch (error) {
-		// ─── 6. BLOK ROLLBACK OTOMATIS JIKA DB GAGAL SIMPAN ───
+		// Rollback ImageKit jika DB gagal
 		if (imageUrls.length > 0) {
-			console.log(
-				'⚠️ Database gagal menyimpan data. Memulai pembersihan berkas sampah di ImageKit...',
-			)
-
 			for (const img of imageUrls) {
 				try {
 					await imagekit.files.delete(img.fileId)
-					console.log(
-						`[Rollback] Berhasil menghapus kembali file sampah ID: ${img.fileId}`,
-					)
 				} catch (ikErr) {
-					console.error(
-						`[Rollback Gagal] Gagal menghapus berkas ${img.fileId}:`,
-						ikErr.message,
-					)
+					console.error(`[Rollback Gagal] ${img.fileId}:`, ikErr.message)
 				}
 			}
 		}
-
-		// Teruskan error utama (misal: "Title is required") ke middleware global error handler
 		next(error)
 	}
 }
@@ -122,7 +182,7 @@ exports.getSpaceById = async (req, res, next) => {
 
 		if (!space) {
 			res.status(404)
-			throw new Error('Arena/Arena tidak ditemukan')
+			throw new Error('Arena tidak ditemukan')
 		}
 
 		return sendSuccess(res, 'Detail arena berhasil diambil', space)
@@ -139,7 +199,7 @@ exports.updateSpace = async (req, res, next) => {
 
 		if (!space) {
 			res.status(404)
-			throw new Error('Arena/Arena tidak ditemukan')
+			throw new Error('Arena tidak ditemukan')
 		}
 
 		if (space.owner.toString() !== req.user.id) {
@@ -149,7 +209,6 @@ exports.updateSpace = async (req, res, next) => {
 			)
 		}
 
-		// Pemrosesan Kategori Baru pada Rute Update
 		if (
 			req.body.category &&
 			!mongoose.Types.ObjectId.isValid(req.body.category)
@@ -164,7 +223,6 @@ exports.updateSpace = async (req, res, next) => {
 			req.body.category = existingCategory._id
 		}
 
-		// Pemrosesan parsing fasilitas pada Rute Update
 		if (req.body.facilities && typeof req.body.facilities === 'string') {
 			try {
 				req.body.facilities = JSON.parse(req.body.facilities)
@@ -175,8 +233,6 @@ exports.updateSpace = async (req, res, next) => {
 			}
 		}
 
-		// ─── BONUS PROTEKSI DATA IMAGES SAAT UPDATE ───
-		// Jika update tidak mengirim berkas file gambar baru, tetap pertahankan gambar lama di DB
 		if (!req.files || req.files.length === 0) {
 			delete req.body.images
 		}
@@ -200,27 +256,38 @@ exports.deleteSpace = async (req, res, next) => {
 
 		if (!space) {
 			res.status(404)
-			throw new Error('Arena/Arena tidak ditemukan')
+			throw new Error('Arena tidak ditemukan')
 		}
 
-		// PROTEKSI: Pastikan owner yang mau hapus adalah pemilik sahnya
 		if (space.owner.toString() !== req.user.id) {
 			res.status(403)
 			throw new Error('Anda tidak memiliki hak akses untuk menghapus arena ini')
 		}
 
-		// 🟢 PROSES PEMBERSIHAN OTOMATIS DI IMAGEKIT
+		// 🛑 PROTEKSI KEAMANAN CUSTOMER (Cegah Owner Kabur)
+		// Cari apakah ada booking sukses yang jadwalnya hari ini atau ke depan
+		const today = new Date()
+		today.setHours(0, 0, 0, 0) // Set ke awal hari ini
+
+		const activeBooking = await Booking.findOne({
+			space: space._id,
+			paymentStatus: 'success', // Hanya yang sudah dibayar
+			date: { $gte: today }, // Jadwal mainnya hari ini atau besok-besok
+		})
+
+		if (activeBooking) {
+			res.status(400)
+			throw new Error(
+				'Arena tidak dapat dihapus! Masih ada pelanggan dengan jadwal aktif mendatang. Silakan tunggu hingga jadwal selesai.',
+			)
+		}
+
+		// 🟢 PROSES PEMBERSIHAN OTOMATIS DI IMAGEKIT (Lanjut jika aman)
 		if (space.images && space.images.length > 0) {
 			for (const img of space.images) {
 				try {
-					// Tembak API ImageKit untuk menghapus file berdasarkan fileId yang tersimpan
 					await imagekit.files.delete(img.fileId)
-					console.log(
-						`Berhasil menghapus file ImageKit dengan ID: ${img.fileId}`,
-					)
 				} catch (ikErr) {
-					// Gunakan try-catch internal agar jika ada satu gambar gagal dihapus di cloud,
-					// proses penghapusan data utama di MongoDB tidak ikut macet/gagal.
 					console.error(
 						`Gagal menghapus gambar ${img.fileId} di ImageKit:`,
 						ikErr.message,
@@ -229,7 +296,6 @@ exports.deleteSpace = async (req, res, next) => {
 			}
 		}
 
-		// Hapus dokumen dari MongoDB setelah semua aset di cloud bersih
 		await space.deleteOne()
 
 		return sendSuccess(

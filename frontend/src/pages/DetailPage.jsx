@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { ArrowLeft, CheckCircle, MapPin, Tag, ChevronLeft, ChevronRight } from 'lucide-react'; // ◄ Tambahkan ChevronLeft & ChevronRight
+import { ArrowLeft, CheckCircle, MapPin, Tag, Store } from 'lucide-react';
 
-// import components
+// Import components
 import ImageCarousel from '../components/ImageCarousel';
 import Toast from '../components/ui/Toast';
-
-// Import utilities
-import API from '../utils/api';
-
-// import hooks
-import useDocumentTitle from '../hooks/useDocumentTitle'
 import BookingWidget from '../components/BookingWidget';
 
+// Import context & utils
+import { useAuth } from '../context/AuthContext'; // ◄ 1. Import AuthContext
+import API from '../utils/api';
+import useDocumentTitle from '../hooks/useDocumentTitle';
+
 const DetailPage = () => {
-  useDocumentTitle('Detail Arena')
+  useDocumentTitle('Detail Arena');
 
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth(); // ◄ 2. Ambil data user yang sedang login
 
   const [space, setSpace] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,14 +33,10 @@ const DetailPage = () => {
   const triggerToast = (type, title, message) => {
     setToastConfig({ show: true, type, title, message });
 
-    // Otomatis tutup toast setelah 3 detik
     setTimeout(() => {
       setToastConfig(prev => ({ ...prev, show: false }));
     }, 3000);
   };
-
-  // 1. STATE KUSTOM UNTUK CAROUSEL GAMBAR
-  const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
   useEffect(() => {
     const fetchSpaceDetail = async () => {
@@ -58,19 +54,24 @@ const DetailPage = () => {
     if (id) fetchSpaceDetail();
   }, [id]);
 
-  if (loading) return <div className="text-center pt-20">Memuat...</div>;
-  if (error || !space) return <div className="text-center pt-20 text-rose-600">{error}</div>;
+  if (loading) return <div className="text-center pt-20 text-slate-500 font-medium">Memuat detail arena...</div>;
+  if (error || !space) return <div className="text-center pt-20 text-rose-600 font-semibold">{error}</div>;
+
+  // 🟢 3. Pengecekan apakah user yang login adalah pemilik arena ini
+  const rawOwnerId = typeof space.owner === 'object' ? space.owner?._id : space.owner;
+  const currentUserId = user?._id || user?.id;
+  const isMyOwnSpace = Boolean(user && currentUserId && rawOwnerId && String(currentUserId) === String(rawOwnerId));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-slate-50 min-h-screen">
 
       {/* TOMBOL KEMBALI */}
       <button
-        onClick={() => navigate('/')}
-        className="flex items-center text-sm font-semibold text-slate-600 hover:text-slate-900 mb-6 transition-colors group"
+        onClick={() => navigate(-1)}
+        className="flex items-center text-sm font-semibold text-slate-600 hover:text-slate-900 mb-6 transition-colors group cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
-        Kembali ke Katalog
+        Kembali
       </button>
 
       {/* LAYOUT UTAMA GRID */}
@@ -79,7 +80,7 @@ const DetailPage = () => {
         {/* KOLOM KIRI: DETAIL VENUE */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* PEMANGGILAN KOMPONEN CAROUSEL YANG SUDAH DIPISAH */}
+          {/* CAROUSEL GAMBAR */}
           <ImageCarousel images={space.images} title={space.title} />
 
           {/* Area Informasi Konten */}
@@ -127,10 +128,41 @@ const DetailPage = () => {
           </div>
         </div>
 
-        {/* KOLOM KANAN: WIDGET PEMESANAN INTERAKTIF */}
-        <BookingWidget space={space} triggerToast={triggerToast} />
+        {/* KOLOM KANAN: WIDGET PEMESANAN ATAU CARD PREVIEW OWNER */}
+        <div className="lg:col-span-1">
+          {isMyOwnSpace ? (
+            /* 🟢 KOTAK INFORMASI KHUSUS OWNER (Ganti Widget Booking) */
+            <div className="bg-white p-6 rounded-2xl border border-amber-200 shadow-xs space-y-4 lg:sticky lg:top-8">
+              <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center">
+                <Store size={24} />
+              </div>
 
-        {/* KOMPONEN TOAST INTERAKTIF PEMICU NOTIFIKASI */}
+              <div>
+                <h2 className="text-lg font-extrabold text-slate-900 tracking-tight">Arena Milik Anda</h2>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Ini adalah halaman peninjauan (*preview*) arena sewa Anda. Pemesanan slot waktu disembunyikan untuk akun pemilik.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-600 space-y-1">
+                <p><span className="font-bold text-slate-700">Harga Sewa:</span> Rp {space.pricePerHour?.toLocaleString('id-ID')} / jam</p>
+                <p><span className="font-bold text-slate-700">Status:</span> Aktif di Katalog</p>
+              </div>
+
+              <button
+                onClick={() => navigate(`/owner/spaces/edit/${space._id}`)}
+                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                Edit Informasi Arena
+              </button>
+            </div>
+          ) : (
+            /* 🌐 WIDGET PEMESANAN NORMAL UNTUK CUSTOMER & OWNER LAIN */
+            <BookingWidget space={space} triggerToast={triggerToast} />
+          )}
+        </div>
+
+        {/* KOMPONEN TOAST INTERAKTIF */}
         <Toast
           show={toastConfig.show}
           type={toastConfig.type}

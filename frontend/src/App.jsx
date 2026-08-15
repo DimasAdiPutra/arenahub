@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import OwnerDashboard from './pages/OwnerDashboard';
 import ProtectedRoute from './components/ProtectedRoute'; // ◄ Import pelindung rute
 import OwnerLayout from './layouts/OwnerLayout';
+import OwnerSpacesPage from './pages/OwnerSpacePage';
 
 export default function App() {
   return (
@@ -34,8 +35,7 @@ export default function App() {
         <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
           <Route element={<OwnerLayout />}>
             <Route path="/owner/dashboard" element={<OwnerDashboard />} />
-            {/* Nanti halaman tambah lapangan bisa ditaruh di sini juga */}
-            {/* <Route path="/owner/spaces/create" element={<CreateSpacePage />} /> */}
+            <Route path="/owner/spaces" element={<OwnerSpacesPage />} />
           </Route>
         </Route>
 

@@ -2,7 +2,7 @@
  * Mengubah angka menjadi format mata uang Rupiah yang rapi
  * Contoh: 150000 -> Rp 150.000
  */
-export const formatRupiah = (number) => {
+export const formatCurrency = (number) => {
 	if (number === undefined || number === null) return 'Rp 0'
 	return new Intl.NumberFormat('id-ID', {
 		style: 'currency',
