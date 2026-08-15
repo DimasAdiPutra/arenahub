@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react';
+import Input from './ui/Input';
 
 export default function SearchFilter({
   searchQuery,
@@ -13,12 +14,12 @@ export default function SearchFilter({
       {/* Kolom Input Pencarian */}
       <div className="relative">
         <Search className="w-5 h-5 text-slate-400 absolute left-4 top-3.5" />
-        <input
+        <Input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Cari nama arena atau lokasi arena..."
-          className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 text-sm transition"
+          className="pl-12"
         />
       </div>
 
