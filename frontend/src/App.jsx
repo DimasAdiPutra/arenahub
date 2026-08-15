@@ -9,6 +9,8 @@ import OwnerDashboard from './pages/OwnerDashboard';
 import ProtectedRoute from './components/ProtectedRoute'; // ◄ Import pelindung rute
 import OwnerLayout from './layouts/OwnerLayout';
 import OwnerSpacesPage from './pages/OwnerSpacePage';
+import CreateSpacesPage from './pages/CreateSpacePage';
+import EditSpacesPage from './pages/EditSpacePage';
 
 export default function App() {
   return (
@@ -36,6 +38,8 @@ export default function App() {
           <Route element={<OwnerLayout />}>
             <Route path="/owner/dashboard" element={<OwnerDashboard />} />
             <Route path="/owner/spaces" element={<OwnerSpacesPage />} />
+            <Route path="/owner/spaces/create" element={<CreateSpacesPage />} />
+            <Route path="/owner/spaces/edit/:id" element={<EditSpacesPage />} />
           </Route>
         </Route>
 

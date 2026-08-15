@@ -24,6 +24,12 @@ const errorHandler = (err, req, res, next) => {
 			.join(', ')
 	}
 
+	if (err.message === 'Request aborted') {
+		statusCode = 500
+		message =
+			'Pengiriman data dibatalkan atau koneksi terputus saat mengunggah foto.'
+	}
+
 	// ──── LOGGING ERROR UNTUK DEBUGGING DI TERMINAL ────
 	console.log('\n❌ [=== ERROR DETECTED ===]')
 	console.log(`📌 Method/URL : ${req.method} ${req.originalUrl}`)

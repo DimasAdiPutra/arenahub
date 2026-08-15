@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const API = axios.create({
 	baseURL: import.meta.env.VITE_BACKEND_URI || 'http://localhost:5000/api', // Base URL Backend Anda
-	timeout: 10000,
+	timeout: 60000,
 })
 
 // Otomatis sisipkan Bearer Token ke Header jika user sudah login

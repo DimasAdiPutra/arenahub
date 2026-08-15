@@ -194,6 +194,8 @@ exports.getSpaceById = async (req, res, next) => {
 // @desc    Update Data Arena (Owner Only)
 // @route   PUT /api/spaces/:id
 exports.updateSpace = async (req, res, next) => {
+	let newUploadedImages = []
+
 	try {
 		let space = await Space.findById(req.params.id)
 
@@ -209,6 +211,58 @@ exports.updateSpace = async (req, res, next) => {
 			)
 		}
 
+		// 1. Parsing existingImages (Daftar gambar lama yang dipertahankan dari Frontend)
+		let parsedExistingImages = []
+		if (req.body.existingImages) {
+			try {
+				parsedExistingImages =
+					typeof req.body.existingImages === 'string'
+						? JSON.parse(req.body.existingImages)
+						: req.body.existingImages
+			} catch (e) {
+				parsedExistingImages = []
+			}
+		}
+
+		// 2. DETEKSI & HAPUS GAMBAR YANG DIBUANG DARI IMAGEKIT
+		// Cari gambar di database yang TIDAK ADA lagi di array parsedExistingImages
+		const imagesToDelete = space.images.filter(
+			(dbImg) =>
+				!parsedExistingImages.some(
+					(keptImg) => keptImg.fileId === dbImg.fileId,
+				),
+		)
+
+		for (const img of imagesToDelete) {
+			try {
+				await imagekit.files.delete(img.fileId)
+			} catch (ikErr) {
+				console.error(`[ImageKit Delete Failed] ${img.fileId}:`, ikErr.message)
+			}
+		}
+
+		// 3. UPLOAD GAMBAR BARU KE IMAGEKIT (JIKA ADA)
+		if (req.files && req.files.length > 0) {
+			for (const file of req.files) {
+				const uniqueFileName = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`
+
+				const uploadResponse = await imagekit.files.upload({
+					file: await toFile(file.buffer, uniqueFileName),
+					fileName: uniqueFileName,
+					folder: '/arenahub',
+				})
+
+				newUploadedImages.push({
+					url: uploadResponse.url,
+					fileId: uploadResponse.fileId,
+				})
+			}
+		}
+
+		// 4. GABUNGKAN GAMBAR LAMA YANG DIPERTAHANKAN + GAMBAR BARU
+		const finalImages = [...parsedExistingImages, ...newUploadedImages]
+
+		// 5. PENANGANAN KATEGORI DINAMIS
 		if (
 			req.body.category &&
 			!mongoose.Types.ObjectId.isValid(req.body.category)
@@ -223,6 +277,7 @@ exports.updateSpace = async (req, res, next) => {
 			req.body.category = existingCategory._id
 		}
 
+		// 6. PARSING FASILITAS
 		if (req.body.facilities && typeof req.body.facilities === 'string') {
 			try {
 				req.body.facilities = JSON.parse(req.body.facilities)
@@ -233,17 +288,36 @@ exports.updateSpace = async (req, res, next) => {
 			}
 		}
 
-		if (!req.files || req.files.length === 0) {
-			delete req.body.images
+		// 7. SETUP PAYLOAD AKHIR & SIMPAN KE DATABASE
+		const updatePayload = {
+			title: req.body.title || space.title,
+			description: req.body.description || space.description,
+			category: req.body.category || space.category,
+			pricePerHour: req.body.pricePerHour
+				? Number(req.body.pricePerHour)
+				: space.pricePerHour,
+			location: req.body.location || space.location,
+			facilities: req.body.facilities || space.facilities,
+			images: finalImages, // 🟢 Set array gambar final hasil penggabungan
 		}
 
-		space = await Space.findByIdAndUpdate(req.params.id, req.body, {
+		space = await Space.findByIdAndUpdate(req.params.id, updatePayload, {
 			new: true,
 			runValidators: true,
 		})
 
 		return sendSuccess(res, 'Data arena berhasil diperbarui', space)
 	} catch (error) {
+		// Rollback: Hapus gambar baru di ImageKit jika simpan DB gagal
+		if (newUploadedImages.length > 0) {
+			for (const img of newUploadedImages) {
+				try {
+					await imagekit.files.delete(img.fileId)
+				} catch (ikErr) {
+					console.error(`[Rollback Failed] ${img.fileId}:`, ikErr.message)
+				}
+			}
+		}
 		next(error)
 	}
 }
