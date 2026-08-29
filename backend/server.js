@@ -29,7 +29,21 @@ const PORT = process.env.PORT || 5000
 connectDB()
 
 // Middleware Global
-app.use(cors()) // Mengizinkan frontend (Vite) untuk mengakses API ini
+app.use(
+	cors({
+		origin: function (origin, callback) {
+			// Izinkan request tanpa origin (seperti Postman atau server-to-server)
+			if (!origin) return callback(null, true)
+
+			if (allowedOrigins.includes(origin)) {
+				callback(null, true)
+			} else {
+				callback(new Error('Akses diblokir oleh kebijakan CORS'))
+			}
+		},
+		credentials: true, // Izinkan cookie / header otorisasi dikirim
+	}),
+) // Mengizinkan frontend (Vite) untuk mengakses API ini
 app.use(express.json()) // Mengizinkan Express membaca data berformat JSON dari body request
 
 app.use((req, res, next) => {
