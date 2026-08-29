@@ -43,3 +43,13 @@ arenahub/
 ├── .gitignore        # Root gitignore protecting env and node_modules
 └── README.md
 ```
+
+## TEST USER
+
+pemilik :
+email - amelia@gmail.com
+password - Amelia123
+
+customer :
+email - adi@gmail.com
+password - Adi12345

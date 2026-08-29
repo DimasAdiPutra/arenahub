@@ -102,7 +102,6 @@ exports.createBooking = async (req, res, next) => {
 			},
 			// 🔥 KUNCI STRATEGI 1: Batasi waktu pembayaran hanya 15 Menit!
 			expiry: {
-				start_time: formattedStartTime, // Waktu sekarang (WIB)
 				duration: 15,
 				unit: 'minute',
 			},
