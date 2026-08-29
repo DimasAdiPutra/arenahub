@@ -7,8 +7,6 @@ exports.registerUser = async (req, res, next) => {
 	try {
 		const { name, email, password, role, phoneNumber } = req.body
 
-		console.log(phoneNumber)
-
 		// 1. Validasi Nomor Telepon (Hanya Boleh Angka, Min 10, Max 15 digit)
 		const phoneRegex = /^[0-9]+$/
 		if (!phoneRegex.test(phoneNumber)) {

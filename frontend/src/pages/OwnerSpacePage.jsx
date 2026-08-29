@@ -40,7 +40,6 @@ export default function OwnerSpacesPage() {
       const res = await API.get('/owner/my-spaces');
       setSpaces(res.data.data || []);
     } catch (err) {
-      console.error(err);
       setError(err.response?.data?.message || 'Gagal mengambil daftar arena milik Anda.');
     } finally {
       setLoading(false);

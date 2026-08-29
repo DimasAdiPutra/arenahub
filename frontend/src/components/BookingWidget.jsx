@@ -149,8 +149,6 @@ const BookingWidget = ({ space, triggerToast }) => {
         }
       });
 
-      console.log(response.data)
-
       // Ambil snap token dari struktur sendSuccess backend-mu
       const snapToken = response.data.data.booking.snapToken;
 
@@ -174,7 +172,6 @@ const BookingWidget = ({ space, triggerToast }) => {
 
     } catch (err) {
       // Ambil pesan error spesifik yang dilempar dari backend-mu
-      console.log(err)
       const errorMessage = err.response?.data?.message || 'Terjadi kesalahan saat membuat pesanan.';
       triggerToast('error', 'Gagal Booking', errorMessage);
     } finally {
