@@ -16,8 +16,8 @@ router.route('/check-availability').get(checkAvailability)
 // 2. Rute Membutuhkan Login (Protect)
 router.use(protect)
 
-router.route('/').post(authorize('customer'), createBooking)
+router.route('/').post(createBooking)
 
-router.route('/my-bookings').get(authorize('customer'), getMyBookings)
+router.route('/my-bookings').get(getMyBookings)
 
 module.exports = router
