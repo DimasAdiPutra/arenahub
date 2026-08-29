@@ -21,12 +21,7 @@ export default function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/space/:id" element={<DetailPage />} />
-
-          {/* 🔏 Jalur Khusus Customer Terautentikasi */}
-          {/* Hanya user dengan role 'customer' yang bisa melihat history booking */}
-          <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
-            <Route path="/history" element={<HistoryPage />} />
-          </Route>
+          <Route path="/history" element={<HistoryPage />} />
         </Route>
 
         {/* 🔏 JALUR AUTENTIKASI (Polos tanpa Navbar/Footer) */}
