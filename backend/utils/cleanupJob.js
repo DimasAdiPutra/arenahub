@@ -7,8 +7,8 @@ const initCleanupJob = () => {
 		console.log('--- 🧹 Menjalankan Pembersihan Booking Menggantung ---')
 
 		try {
-			// Cari waktu batas (15 menit yang lalu dari sekarang)
-			const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000)
+			// Cari waktu batas (5 menit yang lalu dari sekarang)
+			const fifteenMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
 
 			// Cari booking yang statusnya masih 'pending' DAN dibuatnya sudah lebih dari 15 menit yang lalu
 			const result = await Booking.updateMany(
