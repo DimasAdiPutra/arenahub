@@ -35,10 +35,10 @@ Managing sports venues and rental spaces through traditional channels (WhatsApp,
 
 Test both operational perspectives directly with pre-seeded accounts:
 
-| Role | Email | Password | Permissions & Scope |
-| :--- | :--- | :--- | :--- |
-| **👑 Venue Owner** | `amelia@gmail.com` | `Amelia123` | Venue CRUD, multi-image upload, revenue analytics, booking calendar |
-| **👤 Customer** | `adi@gmail.com` | `Adi12345` | Browse catalog, real-time booking, checkout via Midtrans Snap, history |
+| Role               | Email              | Password    | Permissions & Scope                                                    |
+| :----------------- | :----------------- | :---------- | :--------------------------------------------------------------------- |
+| **👑 Venue Owner** | `amelia@gmail.com` | `Amelia123` | Venue CRUD, multi-image upload, revenue analytics, booking calendar    |
+| **👤 Customer**    | `adi@gmail.com`    | `Adi12345`  | Browse catalog, real-time booking, checkout via Midtrans Snap, history |
 
 ---
 
@@ -180,21 +180,21 @@ arenahub/
 
 ## 🔌 API Reference Highlights
 
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Public | Register new customer or owner account |
-| `POST` | `/api/auth/login` | Public | Authenticate user and issue JWT Bearer token |
-| `GET` | `/api/spaces` | Public | Fetch all available venue listings |
-| `GET` | `/api/spaces/:id` | Public | Get detailed information for a specific venue |
-| `POST` | `/api/spaces` | Owner Only | Create venue with multipart images (ImageKit upload) |
-| `PUT` | `/api/spaces/:id` | Owner Only | Update venue details & synchronize image state |
-| `DELETE`| `/api/spaces/:id` | Owner Only | Delete venue (guarded against active bookings) |
-| `GET` | `/api/bookings/check-availability` | Public | Query taken slots for a space on a given date |
-| `POST` | `/api/bookings` | Authenticated | Create booking & receive Midtrans Snap transaction token |
-| `GET` | `/api/bookings/my-bookings` | Customer | Retrieve customer transaction history |
-| `POST` | `/api/bookings/webhook` | Midtrans | Verified SHA-512 webhook for payment status changes |
-| `GET` | `/api/owner/dashboard` | Owner Only | Retrieve revenue, hours, counts, and calendar events |
-| `GET` | `/api/owner/my-spaces` | Owner Only | Fetch all spaces managed by logged-in owner |
+| Method   | Endpoint                           | Access        | Description                                              |
+| :------- | :--------------------------------- | :------------ | :------------------------------------------------------- |
+| `POST`   | `/api/auth/register`               | Public        | Register new customer or owner account                   |
+| `POST`   | `/api/auth/login`                  | Public        | Authenticate user and issue JWT Bearer token             |
+| `GET`    | `/api/spaces`                      | Public        | Fetch all available venue listings                       |
+| `GET`    | `/api/spaces/:id`                  | Public        | Get detailed information for a specific venue            |
+| `POST`   | `/api/spaces`                      | Owner Only    | Create venue with multipart images (ImageKit upload)     |
+| `PUT`    | `/api/spaces/:id`                  | Owner Only    | Update venue details & synchronize image state           |
+| `DELETE` | `/api/spaces/:id`                  | Owner Only    | Delete venue (guarded against active bookings)           |
+| `GET`    | `/api/bookings/check-availability` | Public        | Query taken slots for a space on a given date            |
+| `POST`   | `/api/bookings`                    | Authenticated | Create booking & receive Midtrans Snap transaction token |
+| `GET`    | `/api/bookings/my-bookings`        | Customer      | Retrieve customer transaction history                    |
+| `POST`   | `/api/bookings/webhook`            | Midtrans      | Verified SHA-512 webhook for payment status changes      |
+| `GET`    | `/api/owner/dashboard`             | Owner Only    | Retrieve revenue, hours, counts, and calendar events     |
+| `GET`    | `/api/owner/my-spaces`             | Owner Only    | Fetch all spaces managed by logged-in owner              |
 
 ---
 
@@ -275,7 +275,7 @@ pnpm run dev
 
 Hi! I am **Dimas Adi Putra**, a Full-Stack Web Developer specializing in building high-performance, business-driven web applications and scalable APIs.
 
-### 💼 Services Offered:
+### 💼 Services Offered
 
 - Custom SaaS & Booking Engine Development
 - Payment Gateway & Third-Party API Integrations (Midtrans, Stripe, Xendit)
@@ -285,9 +285,8 @@ Hi! I am **Dimas Adi Putra**, a Full-Stack Web Developer specializing in buildin
 
 **Have a project in mind or need a reliable developer for your team?**
 
-- 📧 **Email:** [dimas.adiputra.dev@gmail.com](mailto:dimas.adiputra.dev@gmail.com) *(or your preferred email)*
+- 📧 **Email:** [dimasadiputra528@gmail.com](mailto:dimasadiputra528@gmail.com)
 - 💼 **GitHub:** [@DimasAdiPutra](https://github.com/DimasAdiPutra)
-- 🌐 **Portfolio / LinkedIn:** Connect on [LinkedIn](https://linkedin.com)
 
 ---
 
