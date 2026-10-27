@@ -48,7 +48,7 @@ export default function OwnerLayout() {
           </button>
 
           <span className="font-extrabold text-base tracking-tight text-slate-900">
-            CeritaKita <span className="text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Owner Panel</span>
+            ArenaHub <span className="text-xs bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Owner Panel</span>
           </span>
         </div>
       </header>

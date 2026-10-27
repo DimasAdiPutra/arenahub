@@ -212,7 +212,7 @@ export default function CreateSpacePage() {
             label="Nama Arena / Lapangan"
             name="title"
             required
-            placeholder="Contoh: Lapangan Futsal Synthetic A - CeritaKita"
+            placeholder="Contoh: Lapangan Futsal Synthetic A - ArenaHUB"
             value={formData.title}
             onChange={handleChange}
           />
